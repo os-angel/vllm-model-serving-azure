@@ -6,11 +6,11 @@ Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requi
 
 - **Hecho:** el repositorio solo contiene documentación; todavía no existe infraestructura ni evidencia operativa.
 - **Decisión:** trabajar por entregas verificables, registrar resultados por requisito y destruir los recursos al final de cada sesión del laboratorio.
-- **Supuesto:** la zona establecida dispone de una L4 y permite crear GKE con las versiones y el driver elegidos. Debe comprobarse antes de una implementación facturable.
+- **Dato informado por el propietario:** `gcloud` mostró cuota regional activa de una L4 y oferta del acelerador en `us-central1-a/b/c`. Se utilizará `us-central1-a`; capacidad efectiva y versiones disponibles se comprobarán antes de la implementación facturable.
 
 ## 1. Infraestructura
 
-**Objetivo:** red, permisos mínimos, GKE Standard zonal y pools CPU/GPU administrados con Terraform. **Salida verificable:** ambos nodos Ready, tamaños previstos y una GPU `nvidia.com/gpu` asignable; plan y costo revisados. **Dependencias:** registrar zona y resolver tipo de disco de 50 GB, cuota, disponibilidad, parche GKE y driver. Mantener el estado y los planes fuera de Git.
+**Objetivo:** red, permisos mínimos, GKE Standard en `us-central1-a` y pools CPU/GPU administrados con Terraform. **Salida verificable:** ambos nodos Ready, discos de arranque `pd-balanced` de 50 GB y una GPU `nvidia.com/gpu` asignable; plan y costo revisados. **Dependencias:** comprobar capacidad efectiva, parche GKE, driver e IP autorizada del operador. Mantener el estado y los planes fuera de Git.
 
 ## 2. Serving
 

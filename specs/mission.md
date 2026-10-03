@@ -6,7 +6,7 @@ Construir un laboratorio replicable en GCP que sirva `nvidia/NVIDIA-Nemotron-Nan
 
 ## Hechos verificados
 
-- El repositorio contiene `README.md` y `AGENTS.md`; aún no hay infraestructura, aplicación, pruebas ni historial Git en este directorio.
+- El repositorio contiene documentación y un commit inicial de la constitución; aún no hay infraestructura, aplicación ni pruebas.
 - El [README](../README.md) declara que esta combinación todavía no se ha desplegado ni medido. Las cifras de capacidad son cálculos de planificación.
 - La [ficha oficial del modelo](https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8) documenta su uso con vLLM y el estado Mamba en FP32.
 
@@ -15,13 +15,13 @@ Construir un laboratorio replicable en GCP que sirva `nvidia/NVIDIA-Nemotron-Nan
 - Proyecto GCP: `llmresearch-510422` (dato proporcionado por el propietario; acceso y configuración del proyecto aún sin comprobar).
 - GKE Standard zonal con un pool CPU y un pool GPU G2/L4. Kubernetes forma parte del aprendizaje del laboratorio.
 - Serving de texto con vLLM y API compatible con OpenAI; interfaz, medición y limpieza son parte del alcance.
-- VPN y alta disponibilidad quedan fuera del alcance inicial. El acceso previsto es `kubectl port-forward` y un Service interno para vLLM.
+- VPN y alta disponibilidad quedan fuera del alcance inicial. El plano de control GKE tendrá endpoint público restringido por Master Authorized Networks a la IP del operador; las cargas usarán Service interno y `kubectl port-forward`, sin LoadBalancer público de inferencia.
 - `specs/tech.md` es el documento técnico único; cumple la función de `techstack.md`.
 
 ## Supuestos y límites
 
-- La cuota informada es una L4 y la VRAM nominal es 24 GB. La cuota y la disponibilidad efectiva en la zona se comprobarán antes de planificar recursos; la VRAM utilizable y la capacidad de servicio se medirán en ejecución.
-- Se informó un disco de 50 GB como «HDD». Su tipo, ubicación y suficiencia para imágenes y caché del modelo siguen por definir.
+- El propietario informó una cuota activa de una L4 en `us-central1` y oferta del acelerador en `us-central1-a`, `us-central1-b` y `us-central1-c`, consultadas con `gcloud`. La capacidad física al crear el nodo no está reservada. La VRAM nominal es 24 GB; VRAM utilizable y capacidad de servicio se medirán en ejecución.
+- La línea base usa discos de arranque `pd-balanced` de 50 GB en ambos nodos. La suficiencia para la imagen y la caché del modelo sigue por comprobar.
 - Este laboratorio no acredita por sí solo privacidad empresarial, autenticación de producción ni una capacidad determinada de usuarios.
 
 ## Resultado aceptable
