@@ -17,3 +17,13 @@ output "service_range_name" {
   description = "Nombre del rango secundario para Services."
   value       = local.service_range_name
 }
+
+output "cluster_name" {
+  description = "Nombre del clúster GKE zonal."
+  value       = google_container_cluster.lab.name
+}
+
+output "cluster_location" {
+  description = "Zona del clúster GKE."
+  value       = google_container_cluster.lab.location
+}

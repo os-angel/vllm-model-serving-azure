@@ -67,6 +67,15 @@ Este diseño no agrega Cloud NAT ni recursos de GKE en el Grupo 1. La red y la s
 
 La configuración del Grupo 1 fija `hashicorp/google` `7.46.1` y produjo un plan local de una VPC y una subred (`2 to add, 0 to change, 0 to destroy`), descrito en [group-1.md](deliveries/01-infra-base/group-1.md). No se aplicó.
 
+## Diseño de GKE y pools del Grupo 2 (2026-10-03)
+
+- Clúster `nemotron-lab` zonal en `us-central1-a`, GKE Standard con canal `STABLE` y versión mínima candidata `1.35.6-gke.1250000`. VPC-native sobre los rangos secundarios `nemotron-pods` y `nemotron-services`; sin pool predeterminado permanente. La versión efectiva puede avanzar por mantenimiento de GKE y se comprobará tras crear el clúster.
+- Endpoint público de control con Master Authorized Networks: un único CIDR IPv4 `/32` del operador, aportado por `TF_VAR_operator_cidr` sin persistirlo en Git; deshabilitar acceso adicional desde IP públicas de GCP. Los nodos conservarán IPv4 externas efímeras. No se crea LoadBalancer de inferencia.
+- Cuenta de servicio de nodos `nemotron-gke-nodes` con solo `roles/container.defaultNodeServiceAccount` para tareas GKE, aplicada a ambos pools con scope `cloud-platform`; las cargas no reciben permisos IAM adicionales por este diseño. Verificar que la identidad que aplica Terraform pueda crear la cuenta y vincular el rol.
+- Pool `cpu`: un `e2-standard-4`; pool `gpu`: un `g2-standard-4` con `nvidia-l4` × 1. Ambos usan `COS_CONTAINERD` y boot disk `pd-balanced` de 50 GB, sin preemptible ni autoscaling. El pool GPU declara `gpu_driver_installation_config = DEFAULT`, etiqueta `workload = gpu` y taint `dedicated=gpu:NoSchedule`.
+- Contrato para la entrega 02: vLLM debe seleccionar `workload=gpu`, solicitar `nvidia.com/gpu: 1` y tolerar `dedicated=gpu:NoSchedule`. Si GKE añade otros taints GPU administrados, observarlos y completar las tolerations antes de desplegar vLLM.
+- El clúster usa `deletion_protection = false` para permitir el cierre controlado del laboratorio. Un plan de destrucción y la verificación de cargas y recursos externos al estado siguen siendo obligatorios.
+
 ## Criterios técnicos de validación
 
 Comprobar nodos Ready, `nvidia.com/gpu: 1`, colocación de pods, carga del modelo, respuesta mediante SDK y chat, streaming, historial y errores. Registrar VRAM en reposo y durante prefill/generación, primer token, p50/p95, tokens/s, cola y concurrencia sostenida. Verificar después la eliminación de cargas y recursos facturables. Los resultados reales irán en `specs/deliveries/<entrega>/validation.md`.

@@ -1,6 +1,6 @@
 # 01 — Infraestructura base: plan
 
-**Estado:** Grupos 0 y 1 completados con evidencia y límites; Grupos 2–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
+**Estado:** Grupos 0–2 completados con evidencia y límites; plan y estimación del Grupo 2 revisados y aprobados por el propietario el 2026-10-03. Grupos 3–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
 
 ## Grupo 0 — Cerrar entradas y costo
 
@@ -46,6 +46,15 @@ La evidencia y los límites constan en [group-0.md](group-0.md) y [validation.md
 4. Validar sintaxis y revisar el plan consolidado, recursos y costo. Presentarlo para revisión humana **antes** de cualquier `apply`.
 
 **Salida revisable:** plan completo y revisión registrada. **Cubre:** INF-03 a INF-07 e INF-09. **Depende de:** grupos 0 y 1.
+
+| Tarea del Grupo 2 | Requisito | Comprobación observable |
+|---|---|---|
+| 2.1 Clúster zonal y acceso | INF-01, INF-03, INF-08 | Plan identifica proyecto/zona, versión/canal, rangos VPC-native y solo el CIDR `/32` vigente para el endpoint. |
+| 2.2 Cuenta de servicio y pool CPU | INF-04, INF-07 | Plan muestra cuenta con rol mínimo, un `e2-standard-4` y `pd-balanced` 50 GB. |
+| 2.3 Pool GPU y contrato de scheduling | INF-05, INF-06, INF-07 | Plan muestra un `g2-standard-4`, una `nvidia-l4`, driver `DEFAULT`, etiqueta, taint y disco de 50 GB; contrato de toleration documentado. |
+| 2.4 Validación y revisión de costo | INF-03–INF-09 | `fmt`, `validate`, plan consolidado y estimación registrados con sus límites; revisión humana antes de `apply`. |
+
+**Resultado:** [group-2.md](group-2.md) registra el plan `7 to add`, la comprobación de configuración, costo y límites. El propietario aprobó el plan y la estimación el 2026-10-03. No hubo `apply`.
 
 ## Grupo 3 — Acceso y validación operativa
 
