@@ -56,6 +56,17 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 
 Las fuentes, comandos y estimación de costo del Grupo 0 están en [su evaluación](deliveries/01-infra-base/group-0.md). La salida y el estado se decidieron el 2026-10-03; el CIDR dinámico se pasará como entrada no versionada antes de cada plan.
 
+## Diseño de red y estado del Grupo 1 (2026-10-03)
+
+- Crear la VPC `nemotron-lab-vpc` en modo personalizado, con una sola subred `nemotron-lab-us-central1` en `us-central1`. La red `default` existente no se modifica.
+- Rangos elegidos: primario de nodos `10.80.0.0/20`, secundario `nemotron-pods` `10.81.0.0/20` y secundario `nemotron-services` `10.82.0.0/22`. Los dos secundarios se reservarán explícitamente para un clúster VPC-native en el Grupo 2. El inventario de 42 subredes del proyecto no mostró solapamientos; no se conoce el direccionamiento de redes externas al proyecto.
+- Usar el backend Terraform local en `.local/terraform-state/` con permisos `0700`, sin archivos de estado ni planes en Git. El directorio de trabajo futuro será `terraform/infra`; el backend apuntará a `../../.local/terraform-state/terraform.tfstate`. El archivo `.terraform.lock.hcl` se versionará para fijar el provider.
+- `compute.googleapis.com` y `container.googleapis.com` están habilitadas. La prueba `projects.testIamPermissions` concedió los permisos principales para API, VPC, subred, firewall, clúster y cuentas de servicio. No se conceden roles nuevos en el Grupo 1; los permisos se comprobarán de nuevo si cambian las credenciales o el diseño.
+
+Este diseño no agrega Cloud NAT ni recursos de GKE en el Grupo 1. La red y la subred no tienen un cargo horario identificado en la [tabla de red](https://cloud.google.com/vpc/network-pricing); tráfico y futuros nodos/IP sí pueden generar cargos. No se hará `apply` sin revisión previa.
+
+La configuración del Grupo 1 fija `hashicorp/google` `7.46.1` y produjo un plan local de una VPC y una subred (`2 to add, 0 to change, 0 to destroy`), descrito en [group-1.md](deliveries/01-infra-base/group-1.md). No se aplicó.
+
 ## Criterios técnicos de validación
 
 Comprobar nodos Ready, `nvidia.com/gpu: 1`, colocación de pods, carga del modelo, respuesta mediante SDK y chat, streaming, historial y errores. Registrar VRAM en reposo y durante prefill/generación, primer token, p50/p95, tokens/s, cola y concurrencia sostenida. Verificar después la eliminación de cargas y recursos facturables. Los resultados reales irán en `specs/deliveries/<entrega>/validation.md`.

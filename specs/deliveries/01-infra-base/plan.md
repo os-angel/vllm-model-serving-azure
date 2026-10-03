@@ -1,6 +1,6 @@
 # 01 — Infraestructura base: plan
 
-**Estado:** Grupo 0 completado el 2026-10-03 con evidencia y límites; Grupos 1–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
+**Estado:** Grupos 0 y 1 completados con evidencia y límites; Grupos 2–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
 
 ## Grupo 0 — Cerrar entradas y costo
 
@@ -27,6 +27,16 @@ La evidencia y los límites constan en [group-0.md](group-0.md) y [validation.md
 3. Preparar la futura configuración de red y revisar formato, validación y plan sin crear recursos.
 
 **Salida revisable:** diff y plan de VPC/subred, con nombres, rangos y costos identificados. **Cubre:** INF-02 y parte de INF-08. **Depende de:** grupo 0.
+
+| Tarea del Grupo 1 | Requisito | Comprobación observable |
+|---|---|---|
+| 1.1 Inventario y rangos | INF-02 | Inventario `gcloud` de VPC/subredes/rutas y cálculo de solapamiento para `10.80.0.0/20`, `10.81.0.0/20`, `10.82.0.0/22`. |
+| 1.2 APIs, permisos y estado | INF-02, INF-09 | APIs habilitadas, permisos efectivos principales comprobados, backend local y exclusiones de Git verificados. |
+| 1.3 VPC y subred en Terraform | INF-02, INF-08 | `terraform fmt -check`, `validate` y plan con exactamente una VPC y una subred con dos secundarios; sin GKE, NAT ni `apply`. |
+
+**Decisión de diseño:** crear `nemotron-lab-vpc` y `nemotron-lab-us-central1` con los tres rangos indicados en [tech.md](../../tech.md). Esta decisión se registra antes de escribir Terraform. Usar provider Google fijado y archivo de bloqueo versionado.
+
+**Resultado:** [group-1.md](group-1.md) registra inventario, diff, plan `2 to add`, verificaciones y límites. No hubo `apply`.
 
 ## Grupo 2 — GKE y pools
 
