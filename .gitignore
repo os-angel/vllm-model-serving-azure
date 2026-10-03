@@ -1,0 +1,12 @@
+# Terraform: conservar el estado local para destroy, fuera de Git.
+.local/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+
+# .terraform.lock.hcl sí debe versionarse cuando se implemente Terraform.

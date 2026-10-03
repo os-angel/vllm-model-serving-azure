@@ -1,6 +1,6 @@
 # 01 — Infraestructura base: plan
 
-**Estado:** plan de trabajo, no ejecutado. Implementar solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan el diseño. Cada grupo termina con una comprobación y un cambio revisable. Esta fase de especificación no escribe Terraform.
+**Estado:** Grupo 0 completado el 2026-10-03 con evidencia y límites; Grupos 1–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
 
 ## Grupo 0 — Cerrar entradas y costo
 
@@ -10,6 +10,15 @@
 4. Obtener la IP pública actual del operador para Master Authorized Networks, definir salida a registros/modelo, permisos mínimos, ubicación del estado Terraform y presupuesto de sesión.
 
 **Salida revisable:** evidencia de prerrequisitos y estimación de costo; decisiones pendientes actualizadas en `specs/tech.md`. **Cubre:** INF-01, INF-07, INF-08, INF-09. **Bloquea:** grupos 1 y 2 si faltan facturación, permisos, IP autorizada o versión compatible.
+
+| Tarea del Grupo 0 | Requisito | Comprobación observable |
+|---|---|---|
+| 0.1 Proyecto, facturación, cuotas, oferta y APIs | INF-01 | Consultas `gcloud` recientes; capacidad física sigue para despliegue futuro. |
+| 0.2 Disco y espacio | INF-07 | Tamaño publicado del checkpoint y cálculo de espacio; uso real sigue para nodo futuro. |
+| 0.3 Canal, parche, COS y driver | INF-03, INF-06 | Documentación y consulta `get-server-config`; mapeo y driver efectivos siguen para nodo futuro. |
+| 0.4 CIDR, salida, permisos, estado y presupuesto | INF-08, INF-09 | Decisiones registradas, estimación con fuentes y revisión antes de `apply`. |
+
+La evidencia y los límites constan en [group-0.md](group-0.md) y [validation.md](validation.md). El propietario eligió IPv4 efímeras y estado local fuera de Git. El CIDR dinámico se proporcionará como entrada no versionada antes de cada plan. Se habilitó Kubernetes Engine API con autorización, se comprobó el parche Stable candidato y la lista pública COS/driver, y se probaron permisos efectivos principales. La versión del nodo y la compatibilidad real se validarán después del despliegue autorizado.
 
 ## Grupo 1 — Red y estado
 

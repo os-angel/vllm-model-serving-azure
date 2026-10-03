@@ -1,20 +1,20 @@
 # 01 — Infraestructura base: validación
 
-**Estado general:** PENDIENTE. Al crear este archivo no hay Terraform ni recursos desplegados desde esta entrega. Ningún criterio está aprobado. Completar fecha, evidencia concreta y limitaciones después de cada comprobación.
+**Estado general:** PENDIENTE. El Grupo 0 se completó con consultas y estimación documentadas el 2026-10-02 y 2026-10-03. No hay Terraform ni infraestructura desplegada desde esta entrega. Ningún requisito completo está aprobado.
 
 ## Registro de evidencia por requisito
 
 | ID | Comprobación prevista | Evidencia que se conservará | Estado |
 |---|---|---|---|
-| INF-01 | Confirmar proyecto, `us-central1-a`, facturación, cuota y oferta G2/L4 antes del plan. | Salida reciente de `gcloud` para cuota regional y oferta zonal, plan con zona principal; capacidad efectiva observada al crear el nodo. Si se usa `us-central1-b/c`, conservar plan nuevo revisado. | PENDIENTE |
+| INF-01 | Confirmar proyecto, `us-central1-a`, facturación, cuota y oferta G2/L4 antes del plan. | 2026-10-02: facturación `True`; L4 1/0, E2 24/0, CPU 200/0, IP en uso 8/0; catálogo `nvidia-l4` en `us-central1-a`. Comandos y límites en [group-0.md](group-0.md). Faltan plan y capacidad efectiva. | PENDIENTE |
 | INF-02 | Comparar red prevista con recursos existentes y plan Terraform. | Rangos VPC/subred/secundarios y extracto del plan; inventario después del despliegue. | PENDIENTE |
-| INF-03 | Revisar plan y consultar versión e imagen de nodos GKE. | Canal/parche planeados y versiones reales del clúster, nodo y `COS_CONTAINERD`. | PENDIENTE |
+| INF-03 | Revisar plan y consultar versión e imagen de nodos GKE. | 2026-10-03: con `container.googleapis.com` habilitada por autorización del propietario, `get-server-config --zone=us-central1-a` devolvió `1.35.6-gke.1250000` como versión Stable predeterminada y válida. GKE publica `cos-125-19216-395-109` para ese parche. Plan y versión real del nodo pendientes. | PENDIENTE |
 | INF-04 | Consultar pool y nodo CPU. | Un nodo Ready; tipo `e2-standard-4`, disco y pool observados. | PENDIENTE |
 | INF-05 | Consultar pool y nodo GPU. | Un nodo Ready `g2-standard-4`; `nvidia.com/gpu: 1` asignable y salida de verificación GPU cuando esté disponible. | PENDIENTE |
-| INF-06 | Revisar configuración de driver y atributos del nodo. | Versión NVIDIA efectiva, evidencia de instalación administrada y etiquetas/taints; ausencia de Operator o instalador paralelo. Tolerations de vLLM quedan para entrega 02. | PENDIENTE |
-| INF-07 | Revisar tipo y tamaño de discos, uso y caché prevista. | Plan e inventario con boot disks `pd-balanced` de 50 GB en ambos nodos; medición de espacio antes de servir el modelo. Si se amplía GPU a 80–100 GB, registrar saturación y nuevo plan. | PENDIENTE |
-| INF-08 | Probar acceso administrativo e inventariar Services. | Master Authorized Networks con CIDR del operador y sin `0.0.0.0/0`; consulta `kubectl get nodes` autorizada y verificación de restricción; inventario sin LoadBalancer de inferencia. | PENDIENTE |
-| INF-09 | Revisar plan y costo antes de aplicar. | Plan identificado, estimación de costo, recursos concretos y constancia de revisión previa. | PENDIENTE |
+| INF-06 | Revisar configuración de driver y atributos del nodo. | 2026-10-03: lista pública de `cos-125-19216-395-109` indica driver `DEFAULT` `580.159.04` para L4; supera referencia R570 para CUDA 12.8. Versión efectiva, taints y GPU asignable pendientes del nodo real. | PENDIENTE |
+| INF-07 | Revisar tipo y tamaño de discos, uso y caché prevista. | 2026-10-02: modelo publicado de ~10.3 GB y cálculo de 50 GB en [group-0.md](group-0.md); imagen y espacio real desconocidos. Plan, disco y medición pendientes. | PENDIENTE |
+| INF-08 | Probar acceso administrativo e inventariar Services. | 2026-10-03: propietario decidió IPv4 efímeras en nodos y comunicó un CIDR dinámico `/32`. Se validó que representa una dirección IPv4; su valor se retiró de los archivos versionables. Reconfirmar IP antes de cada plan; configuración y prueba de `kubectl` pendientes. | PENDIENTE |
+| INF-09 | Revisar plan y costo antes de aplicar. | 2026-10-02: tarifas públicas consultadas; 2026-10-03: propietario eligió dos IPv4 efímeras y estado local. Subtotal USD 0.964554116/h; 30 min USD 0.482277058, sin variables de uso. Fuentes y límites en [group-0.md](group-0.md). Faltan plan y revisión previa a `apply`. | PENDIENTE |
 | INF-10 | Inspeccionar cierre Kubernetes, destrucción e inventario final. | Salida resumida del plan de destrucción, estado final e inventario de clúster, pools, discos, IP, redes y remanentes. | PENDIENTE |
 
 ## Formato para cada ejecución
@@ -36,3 +36,28 @@ Limitaciones y siguiente acción:
 - Un `apply` exitoso no demuestra instalación del driver ni `nvidia.com/gpu` asignable. Requiere evidencia del nodo real.
 - No declarar limpieza completa solo por `terraform destroy`: comprobar recursos creados por controladores y cualquier recurso fuera del estado.
 - No guardar credenciales, tokens, prompts, estado Terraform ni planes en el repositorio.
+
+## Comprobaciones locales del Grupo 0 — 2026-10-02
+
+| Comprobación | Resultado observado | Límite |
+|---|---|---|
+| `git diff --check` | Salida vacía, código de salida 0. | Comprueba espacios en archivos seguidos por Git; no valida arquitectura ni recursos. |
+| Recálculo con `python3 -c` de las cinco tarifas de [group-0.md](group-0.md) | `subtotal=0.954554116 con_ipv4=0.964554116 media_hora=0.482277058`. | Tarifas públicas aproximadas; no incluye consumo variable ni descuentos de la cuenta. |
+| `git status --short` | Los cambios ajenos iniciales `AGENTS.md` y `README.md` se conservaron. | No existe configuración Terraform; `fmt`, `validate` y `plan` no aplican aún. |
+
+No se ejecutó `terraform apply` ni se creó infraestructura. Kubernetes Engine API se habilitó el 2026-10-03 con autorización expresa para consultar versiones. Las limitaciones del Grupo 0 constan en [group-0.md](group-0.md).
+
+## Decisiones y comprobaciones locales — 2026-10-03
+
+| Comprobación | Resultado observado | Límite |
+|---|---|---|
+| Decisiones del propietario | IPv4 efímeras en nodos; estado local fuera de Git; sesión de 30 minutos. | No equivalen a revisión de un plan Terraform ni autorizan `apply`. |
+| `git check-ignore -v` para estado, `.terraform/`, plan y `.tfvars` | Cada ruta de prueba coincidió con una regla de `.gitignore`. | No se ha creado estado ni plan real. |
+| `stat -f '%Sp %N' .local .local/terraform-state` | Ambos directorios `drwx------` (`0700`). | En Grupo 1 se deberá usar `umask 077` al crear archivos de estado y planes. |
+| `git diff --check` | Salida vacía, código de salida 0. | No comprueba archivos nuevos sin seguimiento ni la seguridad de la infraestructura. |
+| `python3 -c` con `ipaddress.ip_network(<CIDR recibido>, strict=True)` | Una dirección IPv4 con prefijo `/32`; valor omitido de la documentación. | Valida sintaxis, no confirma que sea la IP de salida vigente del operador. |
+| `gcloud projects get-iam-policy` y `gcloud auth list`, comparados sin exponer la identidad | No apareció un rol directo del usuario activo en la política del proyecto. | No descarta permisos heredados o por grupo. |
+| `projects.testIamPermissions` sobre el proyecto | Concedidos: `serviceusage.services.enable`, `container.clusters.create`, `compute.networks.create`, `compute.subnetworks.create`, `compute.firewalls.create`, `iam.serviceAccounts.create` e `iam.serviceAccounts.actAs`. | `container.nodePools.create` no es válido para probarlo contra el recurso proyecto. Grants pueden cambiar; no se crearon recursos. |
+| `gcloud services enable container.googleapis.com` y consulta posterior de servicios habilitados | Operación terminada correctamente; `container.googleapis.com` aparece habilitada. | Habilitar API no valida nodos ni garantiza disponibilidad de L4. |
+| `gcloud container get-server-config --zone=us-central1-a` | Stable `1.35.6-gke.1250000` predeterminada y válida. | Reconfirmar antes del plan; COS y driver efectivos requieren nodo. |
+| Búsqueda del valor de la IP proporcionada en archivos del proyecto | Sin coincidencias después de retirarla; no se hizo commit de ese valor. | El plan y estado Terraform locales contendrán el CIDR cuando se cree el clúster; mantenerlos fuera de Git. |

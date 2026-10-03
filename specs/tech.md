@@ -19,14 +19,16 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 | Nodos | Un pool CPU `e2-standard-4` y uno GPU `g2-standard-4` con una L4, según el README |
 | Discos de arranque | `pd-balanced` de 50 GB para cada nodo; evaluar 80–100 GB en GPU si las pruebas muestran falta de espacio |
 | Orquestación | Manifiestos Kubernetes versionados; vLLM en GPU y backend/interfaz en CPU |
-| Acceso de administración | Endpoint público de control GKE con Master Authorized Networks restringido a la IP pública del operador; `kubectl` directo, sin VPN ni bastion |
+| Acceso de administración | Endpoint público de control GKE con Master Authorized Networks restringido a la IP dinámica del operador; proporcionar el CIDR `/32` al preparar cada plan, sin guardarlo en archivos versionables; `kubectl` directo, sin VPN ni bastion |
 | Acceso de cargas | Service `ClusterIP` interno y `kubectl port-forward`; sin LoadBalancer público, alta disponibilidad ni escalado automático inicial |
 | Modelo | `nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8`; inferencia de texto |
 | Ciclo | Terraform para infraestructura, limpieza de cargas antes de `terraform destroy` |
+| Salida de nodos | IPv4 externas efímeras en los dos nodos para descargar imágenes y pesos; sin Cloud NAT inicial (decisión del propietario, 2026-10-03) |
+| Estado Terraform | Backend local en este equipo, en `.local/terraform-state/` bajo la raíz del repositorio y excluido de Git; conservar hasta verificar `destroy` (decisión del propietario, 2026-10-03) |
 
 ## Línea base propuesta, todavía no validada
 
-- **GKE:** canal Stable 1.35 con `COS_CONTAINERD` y driver NVIDIA administrado. Elegir el parche disponible y comprobar que el driver real satisface la imagen de vLLM; R570 o posterior es el objetivo conservador para CUDA 12.8.1. No instalar en paralelo drivers manuales y administrados.
+- **GKE:** canal Stable, parche candidato `1.35.6-gke.1250000` disponible en `us-central1-a` al consultar el proyecto el 2026-10-03. La [tabla pública de GKE](https://docs.cloud.google.com/kubernetes-engine/docs/release-notes) asocia ese parche predeterminado a `cos-125-19216-395-109`; la [lista de drivers de esa imagen COS para L4](https://storage.googleapis.com/cos-tools/19216.395.109/lakitu/gpu_driver_versions.textproto) etiqueta `580.159.04` como `DEFAULT`. Elegir instalación administrada `DEFAULT`; comprobar imagen y driver reales en el nodo antes de considerarlos validados. No instalar en paralelo drivers manuales y administrados.
 - **vLLM:** usar `v0.10.1` como primer candidato porque NVIDIA lo documenta para este checkpoint. Hay versiones posteriores; cambiar de versión exige repetir la prueba de carga del modelo y API. Fijar imagen por digest y revisión del modelo después de validarlas.
 - **Serving inicial:** una GPU, `--mamba_ssm_cache_dtype float32`, `--max-model-len 4096`, `--max-num-seqs 1` y `--gpu-memory-utilization 0.90`, según el README. Los parámetros son un punto de partida, no una capacidad garantizada. Validar la sintaxis con la imagen elegida.
 - **Almacenamiento:** discos de arranque `pd-balanced` de 50 GB en ambos pools. Si la imagen de vLLM y los pesos saturan el nodo GPU, evaluar 80–100 GB `pd-balanced` mediante cambio revisado; no se aumenta preventivamente.
@@ -40,10 +42,19 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 
 ## Conflictos y decisiones pendientes
 
-1. Fijar parche GKE, versión efectiva COS, driver, digest de vLLM y revisión del modelo tras comprobar compatibilidad en `us-central1-a`. La línea base propuesta todavía no es una combinación probada.
-2. Registrar la IP pública actual del operador como CIDR autorizado en el plan de GKE; si cambia, actualizar el plan antes de administrar el clúster. No abrir `0.0.0.0/0`.
-3. Definir acceso de salida para descargar imagen y pesos, gestión de caché, permisos mínimos y ubicación del estado Terraform.
+1. Comprobar en un nodo la imagen COS y el driver realmente instalados para el parche candidato; después probar la compatibilidad con el digest de vLLM y la revisión del modelo que se fijen. La línea base propuesta todavía no es una combinación probada.
+2. Confirmar la IP pública dinámica del operador antes de cada plan de GKE y pasar el CIDR `/32` como entrada no versionada. No abrir `0.0.0.0/0`.
+3. Verificar la descarga real de imagen y pesos por las IPv4 efímeras, la gestión de caché y los permisos mínimos. Proteger el estado local con permisos de archivo restrictivos y conservarlo hasta comprobar la limpieza.
 4. Elegir tecnología de backend/interfaz y umbrales de latencia, errores y duración para las pruebas de concurrencia.
+
+## Observaciones del Grupo 0 (2026-10-02)
+
+- Las consultas de solo lectura confirmaron facturación habilitada, cuota regional `NVIDIA_L4_GPUS` 1/0 usada, `E2_CPUS` 24/0, `CPUS` 200/0 e `IN_USE_ADDRESSES` 8/0 en `us-central1`. `gcloud compute accelerator-types list` devolvió `nvidia-l4` para `us-central1-a`. La oferta y la cuota no prueban capacidad física disponible al crear el nodo.
+- `compute.googleapis.com` estaba habilitada. `container.googleapis.com` estaba deshabilitada el 2026-10-02 y se habilitó el 2026-10-03 con autorización del propietario, sin crear clústeres. La consulta zonal posterior confirmó el parche Stable `1.35.6-gke.1250000`.
+- GKE publica `cos-125-19216-395-109` para ese parche y COS lista `580.159.04` como driver `DEFAULT` para L4. Es una correspondencia documental, no una versión observada en un nodo. Supera la referencia conservadora R570 para CUDA 12.8; la compatibilidad con vLLM continúa como hipótesis hasta la prueba real.
+- El repositorio del modelo muestra aproximadamente 10.3 GB de archivos. Los 50 GB del disco GPU son una hipótesis inicial: faltan tamaño descomprimido de la imagen OCI, caché de descarga, espacio del sistema y medición en el nodo. No se aumenta el disco sin evidencia ni plan revisado.
+
+Las fuentes, comandos y estimación de costo del Grupo 0 están en [su evaluación](deliveries/01-infra-base/group-0.md). La salida y el estado se decidieron el 2026-10-03; el CIDR dinámico se pasará como entrada no versionada antes de cada plan.
 
 ## Criterios técnicos de validación
 
