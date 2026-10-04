@@ -2,7 +2,7 @@
 
 ## Estado y propósito
 
-**Estado:** especificación propuesta; sin Terraform, despliegue ni evidencia operativa. Esta entrega prepara la plataforma mínima para la entrega de serving. Se rige por [mission.md](../../mission.md), [tech.md](../../tech.md) y [roadmap.md](../../roadmap.md).
+**Estado:** aprobada operativamente por el propietario el 2026-10-04 para avanzar a serving. INF-01–INF-06 e INF-08 cuentan con evidencia PASS; INF-07 queda transferido a la descarga/caché del modelo en la entrega 02; INF-10 se pospone al cierre final del laboratorio. El `apply` reportado creó siete recursos. Esta entrega prepara la plataforma mínima para la entrega de serving. Se rige por [mission.md](../../mission.md), [tech.md](../../tech.md) y [roadmap.md](../../roadmap.md).
 
 ## Alcance
 

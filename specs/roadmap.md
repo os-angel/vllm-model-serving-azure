@@ -1,10 +1,10 @@
 # Hoja de ruta del laboratorio
 
-Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requirements.md`, `plan.md` y `validation.md` en `specs/deliveries/<entrega>/`. Los documentos de especificación se revisarán antes del código. No hay entregas implementadas ni validadas todavía.
+Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requirements.md`, `plan.md` y `validation.md` en `specs/deliveries/<entrega>/`. Los documentos de especificación se revisan antes del código. La entrega 01 fue aprobada operativamente el 2026-10-04; INF-07 se valida durante la descarga del modelo y la destrucción INF-10 se difiere al cierre final por decisión del propietario. La entrega 02 está en especificación, pendiente de revisión antes de crear manifiestos.
 
 ## Hechos, decisiones y supuestos de planificación
 
-- **Hecho:** el repositorio solo contiene documentación; todavía no existe infraestructura ni evidencia operativa.
+- **Hecho:** el clúster GKE y sus pools están desplegados y validados operativamente; la evidencia detallada consta en `specs/deliveries/01-infra-base/validation.md`. Serving aún no se ha desplegado.
 - **Decisión:** trabajar por entregas verificables, registrar resultados por requisito y destruir los recursos al final de cada sesión del laboratorio.
 - **Dato informado por el propietario:** `gcloud` mostró cuota regional activa de una L4 y oferta del acelerador en `us-central1-a/b/c`. Se utilizará `us-central1-a`; capacidad efectiva y versiones disponibles se comprobarán antes de la implementación facturable.
 
@@ -14,7 +14,7 @@ Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requi
 
 ## 2. Serving
 
-**Objetivo:** desplegar vLLM con el checkpoint FP8 en la L4 y exponerlo por Service interno. **Salida verificable:** modelo cargado, pod ubicado en GPU, respuesta y streaming desde un cliente compatible con OpenAI; tiempo de recuperación tras reinicio documentado. **Dependencias:** fijar digest de imagen, revisión del modelo, acceso a pesos y espacio de caché. Una sola GPU implica interrupción durante reinicios.
+**Objetivo:** desplegar vLLM con el checkpoint FP8 en la L4 y exponerlo por Service interno. **Salida verificable:** modelo cargado, pod ubicado en GPU, respuesta y streaming desde un cliente compatible con OpenAI; tiempo de recuperación tras reinicio documentado. **Dependencias:** revisión de las especificaciones 02, fijar digest de imagen y revisión del modelo, autorización/licencia de pesos y confirmar espacio de caché durante descarga. Una sola GPU implica interrupción durante reinicios. La infraestructura continúa encendida por decisión del propietario durante la sesión actual; INF-10 se ejecuta al cierre final.
 
 ## 3. Integración
 

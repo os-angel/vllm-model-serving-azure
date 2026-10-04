@@ -1,6 +1,6 @@
 # 01 — Infraestructura base: plan
 
-**Estado:** Grupos 0–2 completados con evidencia y límites; plan y estimación del Grupo 2 revisados y aprobados por el propietario el 2026-10-03. Grupos 3–4 no iniciados. Implementar cada grupo solo después de revisar [requirements.md](requirements.md) y resolver las decisiones que condicionan su diseño. Cada grupo termina con una comprobación y un cambio revisable.
+**Estado:** entrega aprobada operativamente por el propietario el 2026-10-04 para avanzar a serving. INF-01–INF-06 e INF-08 tienen evidencia PASS; INF-07 se transfiere a la validación de caché durante la entrega 02 e INF-10 al cierre final del laboratorio. El propietario reportó `terraform apply` exitoso y confirmó el clúster, pools, driver, red y acceso. El Grupo 4 queda pospuesto expresamente; no destruir infraestructura durante la sesión continua autorizada.
 
 ## Grupo 0 — Cerrar entradas y costo
 
@@ -54,13 +54,22 @@ La evidencia y los límites constan en [group-0.md](group-0.md) y [validation.md
 | 2.3 Pool GPU y contrato de scheduling | INF-05, INF-06, INF-07 | Plan muestra un `g2-standard-4`, una `nvidia-l4`, driver `DEFAULT`, etiqueta, taint y disco de 50 GB; contrato de toleration documentado. |
 | 2.4 Validación y revisión de costo | INF-03–INF-09 | `fmt`, `validate`, plan consolidado y estimación registrados con sus límites; revisión humana antes de `apply`. |
 
-**Resultado:** [group-2.md](group-2.md) registra el plan `7 to add`, la comprobación de configuración, costo y límites. El propietario aprobó el plan y la estimación el 2026-10-03. No hubo `apply`.
+**Resultado:** [group-2.md](group-2.md) registra el plan `7 to add`, la comprobación de configuración, costo y límites. El propietario aprobó el plan y la estimación el 2026-10-03 y reportó `apply` exitoso el 2026-10-04. La comprobación operativa está registrada en [validation.md](validation.md); INF-07 se transfiere a serving.
 
 ## Grupo 3 — Acceso y validación operativa
 
-Tras el despliegue autorizado en una sesión futura, obtener credenciales GKE, inspeccionar la lista de CIDR autorizados y verificar que el operador puede usar `kubectl`. Comprobar nodos Ready, tipo de máquina, boot disk, imagen/versión de nodo, driver efectivo y GPU asignable. Registrar salidas y discrepancias por ID en `validation.md`. El modelo y la aplicación corresponden a entregas posteriores.
+Tras el despliegue reportado, obtener credenciales GKE, inspeccionar la lista de CIDR autorizados y verificar que el operador puede usar `kubectl`. Comprobar nodos Ready, tipo de máquina, boot disk, imagen/versión de nodo, driver efectivo y GPU asignable. Registrar salidas y discrepancias por ID en `validation.md`. El modelo y la aplicación corresponden a entregas posteriores.
 
 **Cubre:** INF-03 a INF-08. **Depende de:** grupo 2 y despliegue autorizado.
+
+| Tarea del Grupo 3 | Requisito | Comprobación observable |
+|---|---|---|
+| 3.1 Inventario y acceso al control | INF-03, INF-08 | Clúster existente, lista de CIDR `/32` autorizados, acceso `kubectl` desde la red del operador y ausencia de Service `LoadBalancer` del laboratorio. |
+| 3.2 Nodos y discos | INF-03, INF-04, INF-05, INF-07 | Dos nodos Ready en los pools correctos; tipos, versiones, imagen, discos y uso real observados. |
+| 3.3 GPU y driver | INF-05, INF-06 | Configuración de instalación administrada, etiqueta y taint efectivos, `nvidia.com/gpu: 1` asignable y versión del driver observada en el nodo. |
+| 3.4 Evidencia y discrepancias | INF-03–INF-08 | Registro por ID de salidas resumidas, fecha, estado y limitaciones en `validation.md`; sin PASS inferido del plan. |
+
+El procedimiento y las salidas aportadas por el propietario se registran en [group-3.md](group-3.md) y [validation.md](validation.md). Las tareas 3.1–3.4 confirmaron control, nodos, red, driver y GPU. INF-07 queda como dependencia para la descarga del modelo; INF-10 se reserva para el cierre final por decisión del propietario.
 
 ## Grupo 4 — Limpieza y cierre
 
