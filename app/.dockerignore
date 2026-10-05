@@ -1,0 +1,9 @@
+# Solo estos archivos entran al contexto; nunca .venv, pruebas o credenciales.
+*
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!main.py
+!static/
+!static/**

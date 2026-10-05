@@ -37,3 +37,21 @@ uv run --no-project python scripts/validate-serving.py --install-sdk --reasoning
 Este perfil usa `/think`, temperatura 0.6 y top_p 0.95. Guarda `protocol.json` y evalúa calidad sobre la respuesta final después de `</think>`, sin borrar el razonamiento de la evidencia. Si falta el marcador o respuesta final, registra FAIL. No sustituye la ejecución base ni su prueba de recuperación.
 
 La entrega 02 fue cerrada por el propietario con limitaciones aceptadas el 2026-10-04. El validador conserva FAIL/PARCIAL y sus códigos de salida; aprobación de entrega no implica pruebas todas verdes. Evidencia y aceptación en `specs/deliveries/02-serving/validation.md`.
+
+## Imagen y manifiestos del chat — Fase 03
+
+Después del build local:
+
+```bash
+uv run --no-project python scripts/validate-chat-image.py --image nemotron-chat:group2
+```
+
+Prueba imagen linux/amd64, arranque con raíz de solo lectura y UID 10001, estáticos, salud backend y serving offline, error de chat, ausencia de herramientas dev y marcador de solicitud en logs. Borra solo su contenedor temporal y guarda evidencia privada en `.local/integration-validation/image-smoke.json`. No prueba Nemotron ni GKE.
+
+Tras observar el digest publicado en el registry:
+
+```bash
+uv run --no-project python scripts/render-chat-manifest.py --image "$APP_IMAGE_REF" --output .local/integration-validation/chat.yaml
+```
+
+`APP_IMAGE_REF` debe pertenecer al repositorio aprobado y usar `@sha256:`. El render valida sintaxis, no existencia remota, y no aplica nada. Plan de recursos, costo y ciclo de vida: [Grupo 2](../specs/deliveries/03-integration/group-2.md). La suite unittest indicada arriba incluye pruebas de rechazo de tags, repositorios distintos y placeholders.

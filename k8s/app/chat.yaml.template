@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nemotron-chat
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: nemotron-chat
+    app.kubernetes.io/part-of: nemotron-lab
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nemotron-chat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nemotron-chat
+        app.kubernetes.io/part-of: nemotron-lab
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 330
+      nodeSelector:
+        workload: cpu
+        kubernetes.io/arch: amd64
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: chat
+          image: ${APP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: VLLM_BASE_URL
+              value: http://vllm:8000/v1
+            - name: VLLM_MODEL
+              value: nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8
+            - name: VLLM_TIMEOUT_SECONDS
+              value: "120"
+            - name: CHAT_TIMEOUT_SECONDS
+              value: "300"
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+              ephemeral-storage: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nemotron-chat
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: nemotron-chat
+    app.kubernetes.io/part-of: nemotron-lab
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: nemotron-chat
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

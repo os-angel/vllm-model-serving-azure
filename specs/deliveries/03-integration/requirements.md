@@ -1,6 +1,6 @@
 # 03 — Integración: requisitos
 
-**Estado:** PLAN APROBADO por el propietario. Grupo 1 autorizado; despliegue pendiente de revisión concreta de recursos y costo.
+**Estado:** PLAN APROBADO por el propietario. Grupos 1 y 2 autorizados; despliegue pendiente de revisión concreta de recursos y costo.
 
 ## Contexto y decisiones
 
@@ -31,3 +31,12 @@ Decisión del propietario al iniciar fase 03: usar FastAPI para un backend senci
 - Destino de imagen, versiones, recursos CPU y límites de timeout/tamaño de petición.
 
 Fuera de alcance: autenticación empresarial, persistencia de conversaciones, HA, autoscaling, tuning del motor y pruebas de capacidad sostenida de fase 04.
+
+## Diseño del Grupo 2 — preparado antes de implementación
+
+- INT-07/2.1: Deployment `nemotron-chat`, namespace existente `inference`, una réplica `Recreate`, selector `workload=cpu` y `kubernetes.io/arch=amd64`. Sin GPU ni tolerations GPU. Requests iniciales CPU 100m, RAM 128Mi, ephemeral 128Mi; límites 500m, 512Mi y 512Mi. Comprobar capacidad libre del pool antes del apply; son valores propuestos, no consumos medidos.
+- Probes startup/readiness/liveness sobre `/health` del backend, sin depender de disponibilidad de vLLM; `/api/status` conserva el estado del serving. Puerto contenedor y Service ClusterIP 8080. Grace period 330 s y timeout de Uvicorn 310 s para permitir terminar solicitudes de hasta 300 s.
+- INT-09/INT-10/2.1: imagen multi-stage Python 3.13 y uv fijados por digest; `uv sync --locked --no-dev --no-install-project`, runtime sin uv ni herramientas de prueba, usuario 10001, filesystem raíz de solo lectura, sin token Kubernetes y sin access log. Contexto de build restringido a `app/` y exclusiones explícitas.
+- INT-10/INT-11/2.2: destino propuesto `us-central1-docker.pkg.dev/llmresearch-510422/nemotron-lab-apps/chat`; repositorio Docker regional privado administrado por Terraform, opcional y deshabilitado por defecto (`enable_app_registry=false`). Terraform administra API de Artifact Registry sin deshabilitarla al destruir y rol Reader únicamente en ese repositorio para la cuenta de nodos. No ampliar permisos del proyecto ni modificar pools.
+- Manifiesto de aplicación preparado como plantilla; render exige imagen de Artifact Registry por digest SHA256 real. No aplicar un tag ni un digest inventado. Publicación local con Docker, sin Cloud Build. No push ni recursos cloud en Grupo 2.
+- Registrar plan de costo, prerequisitos, publicación, rollout, port-forward y eliminación. No crear registry ni desplegar hasta revisión humana de plan concreto; al destruir, permitir borrar las imágenes del repositorio dedicado y comprobar que desapareció.

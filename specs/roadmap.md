@@ -20,7 +20,7 @@ Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requi
 
 ## 3. Integración
 
-**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Dependencia:** elegir tecnología de aplicación y reglas para truncar o resumir historial dentro de 4096 tokens.
+**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Estado:** FastAPI y HTML/JavaScript implementados, presupuesto aproximado de caracteres aprobado, Grupos 1 y 2 validados localmente. Imagen amd64 y manifiestos CPU preparados. **Pendiente:** revisar plan/costo de registry/publicación/despliegue y ejecutar Grupo 3 contra GKE; no se acredita integración real por las pruebas simuladas.
 
 ## 4. Evaluación y cierre
 

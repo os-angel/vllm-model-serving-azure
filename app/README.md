@@ -1,4 +1,4 @@
-# Chat local — Grupo 1
+# Chat FastAPI — Grupos 1 y 2
 
 Backend FastAPI y chat HTML/JavaScript. Desde `app/`:
 
@@ -26,5 +26,16 @@ uv run pytest
 Las pruebas de navegador requieren Chromium de Playwright. Si no está instalado, ejecutar `uv run playwright install chromium`; también puede indicarse una instalación existente con `CHAT_BROWSER_PATH`. Las capturas de pruebas quedan ignoradas por Git en `.local/integration-validation/`.
 
 Las pruebas locales usan un endpoint controlado; no acreditan GKE, calidad ni capacidad real. Manifiestos y empaquetado de imagen corresponden al Grupo 2. El cierre cloud sigue el orden Kubernetes/PVC y Terraform descrito en las especificaciones.
+
+## Imagen y Kubernetes
+
+Desde la raíz del repositorio, crear `.local/integration-validation` y ejecutar:
+
+```bash
+docker buildx build --platform linux/amd64 --load --tag nemotron-chat:group2 --metadata-file .local/integration-validation/image-build.json app
+uv run --no-project python scripts/validate-chat-image.py --image nemotron-chat:group2
+```
+
+Dockerfile multi-stage con bases por digest, lock de uv sin dependencias dev y runtime UID 10001. La prueba usa raíz de solo lectura y límite 512Mi/0.5 CPU. Manifiesto en `k8s/app/chat.yaml.template`; render exige referencia por digest del registry privado. Recursos, IAM, costo y comandos de publicación/despliegue/limpieza: [plan operativo del Grupo 2](../specs/deliveries/03-integration/group-2.md). No publicar ni aplicar sin revisión previa. `terraform/infra/app_registry.tf` permanece inactivo por defecto.
 
 Referencias de implementación consultadas: [SDK Python de OpenAI](https://developers.openai.com/api/reference/python) y [StreamingResponse de FastAPI](https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse). El backend utiliza Chat Completions contra vLLM, sin llamadas a OpenAI.

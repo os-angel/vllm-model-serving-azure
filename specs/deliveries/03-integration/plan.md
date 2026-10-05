@@ -1,6 +1,6 @@
 # 03 — Integración: plan
 
-**Estado:** APROBADO por el propietario; iniciar Grupo 1. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
+**Estado:** APROBADO por el propietario; Grupos 1 y 2 implementados y validados localmente. Grupo 3 pendiente de revisión de publicación/despliegue. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
 
 ## Grupo 0 — Revisar diseño
 
@@ -27,6 +27,8 @@ Salida: pruebas locales de payloads, fronteras de contexto, streaming y errores 
 - 2.2 Preparar instrucciones y plan concreto de publicación/despliegue con costo incremental y eliminación de imágenes/registry. INT-10–INT-11.
 
 Salida: diff y artefactos revisables. Antes de despliegue facturable, presentar recursos y costo al propietario; no aplicar sin revisión.
+
+**Resultado:** Dockerfile con bases por digest, imagen linux/amd64 construida y smoke test aprobado, Deployment/Service CPU preparados y dos esquemas Kubernetes 1.35 válidos. Terraform opcional para registry valida; ocho pruebas de scripts aprobadas. Recursos, costo incremental y comandos concretos en [group-2.md](group-2.md). No se ejecutaron plan/apply Terraform reales, publicación ni despliegue; el digest remoto y la capacidad libre del nodo CPU se verifican antes del Grupo 3.
 
 ## Grupo 3 — Integración real y revisión
 
