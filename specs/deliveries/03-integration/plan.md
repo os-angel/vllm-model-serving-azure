@@ -19,6 +19,8 @@ Salida: decisiones registradas, requisitos y plan revisados; crear rama independ
 
 Salida: pruebas locales de payloads, fronteras de contexto, streaming y errores con servidor controlado; evidencias separadas de las pruebas reales GKE.
 
+**Resultado:** tareas 1.1–1.4 implementadas en `app/`; 24 pruebas locales aprobadas, incluidas tres pruebas de navegador con HTTP/stream controlado. Evidencia y límites en `validation.md`. El presupuesto es estimado por decisión del propietario. Grupo 2 pendiente; no se desplegó aplicación en GKE.
+
 ## Grupo 2 — Empaquetado y manifiestos
 
 - 2.1 Dependencias fijadas, Dockerfile, Deployment CPU, Service ClusterIP y probes; comprobar build y configuración. INT-07, INT-10.

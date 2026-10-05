@@ -1,0 +1,27 @@
+:root { font-family: system-ui, sans-serif; color: #182b35; background: #eef3f4; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 900px; margin: 32px auto; padding: 28px; background: white; border-radius: 16px; }
+header, .actions, .controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+header { justify-content: space-between; }
+h1 { margin: 0; font-size: 28px; }
+.eyebrow { color: #526975; font-size: 13px; margin: 0 0 4px; }
+.hint { color: #526975; font-size: 14px; line-height: 1.5; }
+#messages { min-height: 160px; }
+.message { padding: 14px 16px; background: #f1f5f6; margin: 12px 0; border-radius: 10px; }
+.message.user { background: #e6f4f1; }
+.message strong { font-size: 13px; }
+.message p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; margin: 8px 0 0; }
+label { display: block; font-size: 14px; }
+textarea, input, select { font: inherit; border: 1px solid #9fafb7; border-radius: 6px; padding: 9px; background: white; color: inherit; }
+textarea { width: 100%; margin: 8px 0 16px; resize: vertical; }
+input { width: 110px; display: block; margin-top: 5px; }
+select { display: block; margin-top: 5px; }
+.actions { margin-top: 18px; }
+button { border: 1px solid #236b62; border-radius: 7px; padding: 10px 16px; font: inherit; background: white; color: #236b62; cursor: pointer; }
+#send { background: #236b62; color: white; }
+button:disabled { opacity: .55; cursor: wait; }
+[hidden] { display: none !important; }
+#notice { color: #75531b; } #error { color: #9f2424; }
+:focus-visible { outline: 3px solid #42a795; outline-offset: 2px; }
+@media (max-width: 600px) { main { margin: 0; padding: 18px; border-radius: 0; } }

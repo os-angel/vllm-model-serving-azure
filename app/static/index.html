@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat · Nemotron</title><link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <header><div><p class="eyebrow">Laboratorio de inferencia</p><h1>Nemotron Chat</h1></div><button id="reset" type="button">Nueva conversación</button></header>
+    <p id="service" role="status">Consultando servicio…</p>
+    <p class="hint">Historial temporal · Contexto de 4096 tokens estimado por caracteres. La calidad del modelo tiene limitaciones conocidas.</p>
+    <section id="messages" aria-label="Conversación"></section>
+    <p id="notice" role="status"></p><p id="error" role="alert"></p>
+    <form id="form">
+      <label for="prompt">Tu mensaje</label><textarea id="prompt" rows="3" maxlength="16384" required placeholder="Escribe tu pregunta…"></textarea>
+      <div class="controls">
+        <label>Temperature <input id="temperature" type="number" min="0" max="2" step="0.1" value="0.6" required></label>
+        <label>Max tokens <input id="max-tokens" type="number" min="1" max="2048" step="1" value="1024" required></label>
+        <label>Razonamiento <select id="reasoning"><option value="no_think">Desactivado (/no_think)</option><option value="think">Activado (/think)</option></select></label>
+      </div>
+      <div class="actions"><button id="send">Enviar</button><button id="retry" type="button" hidden>Reintentar</button><button id="cancel" type="button" hidden>Cancelar</button></div>
+    </form>
+  </main>
+  <script type="module" src="/static/chat.js"></script>
+</body>
+</html>
