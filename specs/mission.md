@@ -6,7 +6,7 @@ Construir un laboratorio replicable en GCP que sirva `nvidia/NVIDIA-Nemotron-Nan
 
 ## Hechos verificados
 
-- Infraestructura y serving están desplegados; las pruebas observadas constan en validación 01 y 02. Entrega 02 cerrada con limitaciones aceptadas por el propietario el 2026-10-04; aplicación de fase 03 implementada y validada localmente con imagen/manifiestos preparados, aún sin desplegar en GKE.
+- Infraestructura, serving y aplicación CPU están desplegados; pruebas en validación 01–03. Entrega 02 cerrada con limitaciones aceptadas por el propietario el 2026-10-04. Grupo 3 de integración comprobó SDK, chat de varios turnos y errores; observó dos reinicios automáticos del serving por un fallo de caché Mamba durante pruebas de interrupción/reintento. Revisión del resultado 03 y limpieza final pendientes.
 - El modelo responde por la API interna y externa mediante port-forward. Las cifras de concurrencia del README siguen siendo cálculos de planificación, no capacidad validada.
 - La [ficha oficial del modelo](https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8) documenta su uso con vLLM y el estado Mamba en FP32.
 

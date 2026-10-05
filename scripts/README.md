@@ -55,3 +55,17 @@ uv run --no-project python scripts/render-chat-manifest.py --image "$APP_IMAGE_R
 ```
 
 `APP_IMAGE_REF` debe pertenecer al repositorio aprobado y usar `@sha256:`. El render valida sintaxis, no existencia remota, y no aplica nada. Plan de recursos, costo y ciclo de vida: [Grupo 2](../specs/deliveries/03-integration/group-2.md). La suite unittest indicada arriba incluye pruebas de rechazo de tags, repositorios distintos y placeholders.
+
+## Integración real — Grupo 3
+
+Con chat y vLLM desplegados, abrir port-forwards autenticados en terminales separadas:
+
+```bash
+kubectl -n inference port-forward --address=127.0.0.1 svc/nemotron-chat 18080:8080
+kubectl -n inference port-forward --address=127.0.0.1 svc/vllm 18000:8000
+uv run --project app python scripts/validate-integration.py --app-url http://127.0.0.1:18080 --vllm-url http://127.0.0.1:18000/v1 --output .local/integration-validation/group3-live
+```
+
+Usa dependencias fijadas de `app/uv.lock` y Chromium instalado. Ejecuta inferencia real: comprobar recursos/costo y aprobación del despliegue previamente. Guarda contenido y capturas únicamente bajo `.local`, ignorado por Git; no compartir sin revisar. Cada comprobación imprime PASS/FAIL observado; salida 1 si alguna falla. No acredita calidad ni capacidad sostenida. `--context-only` comprueba salud, rechazo y frontera/recorte estimados sin repetir SDK/navegador.
+
+`--offline` comprueba backend disponible/modelo no disponible y reintento manual con navegador. Requiere preparar previamente una indisponibilidad controlada de la conexión del chat; el script no modifica Kubernetes ni reinicia vLLM. Restaurar el manifiesto aprobado y reconectar el port-forward después de cada rollout. Plan y evidencia de fallos controlados: [Grupo 3](../specs/deliveries/03-integration/group-3.md).

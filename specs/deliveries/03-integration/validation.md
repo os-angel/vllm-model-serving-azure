@@ -1,6 +1,16 @@
 # 03 — Integración: validación
 
-**Estado:** GRUPOS 1 Y 2 IMPLEMENTADOS Y VALIDADOS LOCALMENTE. Entrega 03 abierta; publicación/despliegue y Grupo 3 pendientes.
+**Estado:** ENTREGA 03 CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Recuperación del serving tras interrupción/reintento fallida; resultado original conservado. Limpieza final autorizada y en ejecución.
+
+## Inicio del Grupo 3 — preflight y revisión pendiente
+
+El propietario solicitó continuar Grupo 3. Se releyeron contexto y requisitos; Git conserva sin cambios los archivos ajenos `AGENTS.md`, `Aprendizajes.md` y `Diagrama.md`. Se consultaron GKE/Artifact Registry y se generó el plan real, sin crear recursos ni publicar imágenes. Evidencia resumida y protocolo en [group-3.md](group-3.md).
+
+- INT-07: nodo CPU Ready/amd64 y capacidad de requests suficiente para la propuesta; aplicación todavía no desplegada.
+- INT-11: plan real **3 to add, 0 to change, 0 to destroy**, exclusivamente API Artifact Registry, repositorio e IAM Reader. Plan/log/JSON privados en `.local/terraform-state/phase03-registry*`, excluidos de Git. Costo reconfirmado con fuente oficial y presentado para revisión; aprobación de apply pendiente.
+- Serving observado 1/1 Ready con Service ClusterIP. Esto no demuestra respuesta de inferencia en esta ejecución. INT-01/08 y pruebas de navegador reales siguen pendientes.
+- Consultas iniciales fallaron por restricciones del sandbox y se repitieron con escalación autorizada. Lectura de plan JSON también requirió ejecución del provider fuera del sandbox; repetición exitosa. No son fallos del despliegue.
+- No apply, push ni manifiestos aplicados. Sin recursos nuevos que limpiar; INF-10 y cierre heredado permanecen pendientes de la sesión continua.
 
 ## Inicio
 
@@ -14,17 +24,17 @@ Decisión recibida del propietario: backend FastAPI, priorizando facilidad de pr
 
 | ID | Comprobación prevista | Resultado y evidencia |
 |---|---|---|
-| INT-01 | DNS interno, SDK backend y respuesta real. | PARCIAL: SDK real probado con transporte HTTP controlado; DNS/pod/respuesta de Nemotron pendientes Grupo 3. |
-| INT-02 | Payload de varios turnos y reinicio de conversación. | PASS LOCAL: navegador envía user/assistant/user en orden; nueva conversación y recarga borran historial. GKE pendiente. |
-| INT-03 | Fragmentos visibles y estados de cierre/truncamiento. | PASS LOCAL: primer fragmento visible antes de completar; stop, length, salida vacía y falta de DONE diferenciados. GKE pendiente. |
-| INT-04 | Salud separada, timeout, desconexión y reintento. | PASS LOCAL: backend disponible con serving 503; timeout, 400/500, cancelación y reintento manual comprobados; sin duplicación ni retry SDK. GKE pendiente. |
-| INT-05 | Validación de controles y parámetros enviados. | PASS LOCAL: controles y payload SDK verificados; rangos inválidos y max_tokens fraccionario rechazados sin invocar serving. |
-| INT-06 | Estimación de caracteres, fronteras y retiro de turnos completos. | PASS LOCAL contra decisión aprobada: frontera estimada 4096, exceso de un carácter, retiro de pares y aviso visible. No acredita conteo real del tokenizer. |
-| INT-07 | Scheduling CPU, recursos, probes y acceso interno. | PARCIAL: Deployment/Service CPU con probes y recursos explícitos, dos esquemas válidos. Scheduling/Ready/port-forward GKE pendientes. |
-| INT-08 | Cliente SDK independiente: chat y streaming. | PENDIENTE: ejecutar protocolo específico 03. |
-| INT-09 | Logs sin contenido, texto seguro e historial efímero. | PARCIAL: pruebas confirman texto HTML inerte, almacenamiento del navegador vacío y errores sin eco de contenido. Código no registra prompts/respuestas/excepciones; auditoría de logs del pod pendiente. |
-| INT-10 | Build reproducible, versiones/digest e instrucciones. | PARCIAL: Dockerfile por digest, uv.lock y build linux/amd64 observados; runtime no root/solo lectura probado. Digest de Artifact Registry y despliegue pendientes. |
-| INT-11 | Revisión de recursos/costo y evidencia de limpieza. | PARCIAL: propuesta concreta de registry/IAM/manifiestos, costo con fuentes y limpieza en group-2.md. Plan real y revisión antes de apply, recursos cloud y cierre final pendientes. |
+| INT-01 | DNS interno, SDK backend y respuesta real. | PASS OBSERVADO: backend configurado `http://vllm:8000/v1`, conversación real de dos turnos completada; modelo solicitado coincide con SDK independiente. No acredita disponibilidad sostenida. |
+| INT-02 | Payload de varios turnos y reinicio de conversación. | PASS REAL: navegador envía user/assistant/user en orden, incluido contenido exacto del primer assistant; reset y recarga borran historial; petición posterior al reset sin historial anterior. Payloads privados en `group3-live/`. |
+| INT-03 | Fragmentos visibles y estados de cierre/truncamiento. | PASS REAL: fragmento antes del cierre con Enviar deshabilitado; conversación stop, max_tokens=1 truncado, cancelación y desconexión inesperada con error visible, sin guardar éxito falso. Salida vacía/falta de DONE además probadas localmente. |
+| INT-04 | Salud separada, timeout, desconexión y reintento. | PARCIAL REAL: backend Ready con URL de serving inválida; timeout controlado y reintento manual sin duplicación ni reenvío automático. FAIL de recuperación de inferencia tras desconexión/reintento: vLLM falla y reinicia automáticamente; el chat muestra error. Causa pendiente, no corregida fuera de alcance. |
+| INT-05 | Validación de controles y parámetros enviados. | PASS REAL + LOCAL: navegador envía temperature=0, max_tokens=2048, reasoning=think; payload SDK independiente registrado. Backend rechaza 2.1/0/fraccionario con 422. Payload backend→SDK probado localmente; no se instrumentó el tráfico interno con contenido en logs. |
+| INT-06 | Estimación de caracteres, fronteras y retiro de turnos completos. | PASS REAL contra decisión aprobada: meta 4095 + salida 1 = 4096, un carácter adicional → 422; par antiguo retirado completo, meta 25 y removed_turns=1. Aviso visible en navegador con historial sintético inyectado en la petición real. No acredita tokenizer exacto. |
+| INT-07 | Scheduling CPU, recursos, probes y acceso interno. | PASS REAL: chat 1/1 Ready en CPU amd64, cero reinicios del pod final; requests/limits/probes previstos; Service ClusterIP 8080, port-forward funcional y diff final sin diferencias. |
+| INT-08 | Cliente SDK independiente: chat y streaming. | PASS REAL: chat no vacío/modelo correcto/stop y streaming de 183 chunks/stop; `/think`, temperature=0, max_tokens=2048. No atribuye calidad general. |
+| INT-09 | Logs sin contenido, texto seguro e historial efímero. | PASS EN MUESTRA: 28 entradas cloud de todos los pods del chat, sin marcadores de prompts/respuesta ni access logs; código sin contenido/Secret/token Kubernetes. JS desplegado idéntico al validado localmente con HTML inerte; recarga sin historial/storage. No es auditoría exhaustiva de seguridad ni de logs de vLLM. |
+| INT-10 | Build reproducible, versiones/digest e instrucciones. | PASS REAL: reconstrucción amd64/smoke, push y digest remoto confirmado, Deployment por digest; lock/bases fijados e instrucciones reproducibles. |
+| INT-11 | Revisión de recursos/costo y evidencia de limpieza. | PARCIAL: aprobación explícita antes de apply, tres recursos creados sin modificar infraestructura heredada; limpieza documentada y manifiesto restaurado. Cierre cloud/registry/PVC/Terraform no ejecutado aún en sesión continua. |
 
 Para cada ejecución registrar fecha/hora, tarea, comando o procedimiento, resultado observado, ubicación de evidencia y límites. Pruebas simuladas no acreditan integración real. Crear estos documentos no acredita ningún requisito funcional.
 
@@ -59,3 +69,36 @@ No se consultó ni modificó GCP/GKE durante Grupo 1; no hay nuevos recursos fac
 - Plan revisable [group-2.md](group-2.md): API/repository/Reader opcionales, publicación local, acceso interno y limpieza. Costo de referencia USD 0.000136986/GiB-h; ejemplo presupuestado 0.25 GiB, ~USD 0.025/mes sin asumir franquicia. Tarifa consultada en [Artifact Registry](https://cloud.google.com/artifact-registry/pricing); no hay consumo remoto medido.
 
 No se hizo push, no se creó registry, no se concedió IAM y no se aplicaron manifiestos. Capacidad libre CPU, permisos efectivos de publicación/pull, plan Terraform real, digest remoto y API/chat en GKE quedan pendientes. El cierre de infraestructura heredada continúa pendiente de INF-10 durante la sesión continua autorizada; no se atribuye limpieza cloud al retiro del contenedor local.
+
+## Evidencia del Grupo 3 — ejecución aprobada
+
+El propietario aprobó aplicar el plan de tres recursos, publicar imagen y desplegar chat con «si, demosle». Esta aprobación llegó después de presentar recursos/costo. Se usó `uv` para toda ejecución Python. No se modificaron archivos ajenos.
+
+- Terraform apply del plan revisado → **3 added, 0 changed, 0 destroyed**: API Artifact Registry, repositorio `nemotron-lab-apps` y Reader de nodos. Plan/estado privados; no se versionan. Imagen local `group2` ausente: reconstruida como `nemotron-chat:group3`, conservando manifest amd64 `sha256:29d4b092755a4fd67a5a2a562554ce69f59ef7e817aca86c2b437454e1b2d4e0`; smoke con uv → PASS, contenedor de prueba eliminado.
+- Push de `phase03-d736446-group3` → exit 0. Digest remoto confirmado con gcloud: `sha256:a8f4b0b7f77652121dc0b6065d8a4f48fa5e8bf46dc24bd9347a95b3c487c1fc`. Dry-run server → Deployment/Service admitidos; diff exit 1 mostró únicamente creación de esos dos objetos. Apply/rollout → exitosos. GKE añadió anotación NEG de Ingress al Service; no se creó Ingress ni LoadBalancer en esta entrega.
+- Chat inicial `nemotron-chat-85844494c4-lzhhd` 1/1 Ready en nodo CPU `gke-nemotron-lab-cpu-9c917b27-6bgj`. Final tras fallos controlados: `nemotron-chat-85844494c4-hpmqk`, 1/1 Ready, cero reinicios del contenedor. `VLLM_BASE_URL=http://vllm:8000/v1`, timeout total 300 s restaurados; `kubectl diff` contra manifiesto aprobado → exit 0.
+- Evidencia de deploy/pods/service/build/registry en `.local/integration-validation/group3-*.json`. Registry informa `imageSizeBytes=52166495` para manifest amd64 y 1819 para atestación. Son campos del API, no factura ni almacenamiento total medido. Presupuesto de 0.25 GiB (~USD 0.025/730 h) permanece ilustrativo; fuente reconfirmada en [precios de Artifact Registry](https://cloud.google.com/artifact-registry/pricing).
+- Port-forwards de pruebas: 18080→chat:8080 y 18000→vLLM:8000, dirección 127.0.0.1. Puertos 8000/IPv4 8080 ya ocupados; no se detuvieron procesos ajenos. Los port-forwards propios se retiran al cerrar las pruebas.
+- `uv run --project app python scripts/validate-integration.py ... --output .local/integration-validation/group3-live` → exit 0, ocho comprobaciones aprobadas: salud, rechazo, SDK chat/stream, conversación navegador, truncación, cancelación, recarga. SDK de 183 chunks con finish stop; navegador dos turnos y parámetros en payload. Capturas reales desktop/mobile revisadas; sin overflow horizontal a 390×844. Texto de razonamiento se muestra como texto; la segunda respuesta vuelve a responder sobre París en lugar de identificar Francia: fallo de calidad conservado, no evaluado como PASS de calidad.
+- Indisponibilidad controlada: cambiar **solo chat** a URL `http://127.0.0.1:9/v1`, rollout, `--offline` → tres comprobaciones PASS. Backend Ready/modelo no disponible; un reintento manual con payload igual y un turno visible; cero retries automáticos observados. Timeout controlado: restaurar URL interna y timeout total 0.001 s → mensaje de espera agotada y botón de reintento visibles. Después restaurar timeout 300 s. No se cambió Deployment/PVC/configuración de vLLM.
+- Contexto: recheck secuencial `--context-only --output .../group3-context-recheck` → tres PASS. Petición de 16284 caracteres y salida reservada 1: meta 4095/4096; añadir un carácter → 422. Historial sintético de 8300+8300 caracteres: retirada de un par completo, meta 25/removed_turns=1. Ambas inferencias finalizan con error de truncación esperado para salida 1, sin fingir éxito. Aviso del navegador comprobado con historial sintético en payload de petición real; `group3-pruning-browser-recheck.json`.
+- Auditoría cloud: `group3-cloud-chat-logs.json`, 28 entradas desde despliegue, sin marcadores de seis preguntas de pruebas ni frase representativa de respuesta, sin access logs de chat. `group3-log-audit.json`: JS desplegado coincide byte a byte con `app/static/chat.js`, SHA256 `42654a3f2e3548e8f4f343a5381414a12da09d508c59cde7e19a949f48a3d922`; prueba local de HTML inerte corresponde al mismo código. Muestreo de marcadores no demuestra ausencia de todo contenido posible ni reemplaza auditoría de secretos.
+
+### Fallos y limitaciones conservados
+
+1. Primera prueba de contexto (`group3-context/`) tuvo FAIL del fixture: dos mensajes de 8000 caracteres con salida 1 no exceden el presupuesto y no deben recortarse. Se corrigió a 8300, sin cambiar requisitos ni código de aplicación. También hubo upstream errors durante esa ejecución. Primera preparación del aviso por asignación de variable desde Playwright no produjo recorte; fixture corregido inyectando el historial en payload real. Se conservan JSON fallidos y rechecks, no se atribuyen al backend como fallos corregidos.
+2. **Fallo real de vLLM:** durante pruebas finales se observó `IndexError: pop from empty list` en `constant_size_cache.py`, `_assign_seq_id_to_cache_index`, con `MQEngineDeadError`. Pod conservó UID, pero restartCount pasó de 0 a 2. Primera observación coincidió con peticiones de contexto y stream iniciadas solapadamente; no demuestra causalidad ni es una prueba de concurrencia sostenida. Segunda observación ocurrió al interrumpir un port-forward propio tras primer fragmento y reintentar, ejecutada después de recuperar serving. No se solicitó ningún reinicio de vLLM; reinicios automáticos observados.
+3. Interrupción inesperada: navegador mostró `network error`, habilitó reintento manual, conservó el mismo payload y no duplicó turnos. Reintento terminó con «El stream se interrumpió. Puedes reintentar manualmente.» y el motor volvió a reiniciar. Prueba privada `check-disconnect.py` → exit 1; `group3-disconnect/results.json` conserva error del reintento. **No se declara recuperación de inferencia PASS.** Causa específica/corrección del motor pendientes y fuera del alcance aprobado de integración; no se cambiaron versión ni parámetros para ocultar el fallo.
+4. Esperas de recuperación automática comprobaron Ready de nuevo. Estado final capturado: chat y vLLM 1/1 Ready, vLLM con dos reinicios; `/api/status` backend/serving available. Ready no demuestra que el defecto esté corregido. Pruebas con `/think` y 2048 pasan técnicamente; no garantizan finalización ni calidad de valores iniciales `/no_think`/1024.
+
+### Cierre de las pruebas y revisión pendiente
+
+Se restauró manifiesto normal y se retiraron contenedores temporales/port-forwards propios. Permanecen aplicación, serving, PVC e infraestructura en la **sesión continua autorizada**; no se ejecutó destroy ni se acredita limpieza cloud. INT-11/INF-10 continúan pendientes. Al cierre final: eliminar chat, serving y PVC mientras GKE esté accesible; esperar limpieza de discos/controladores; Terraform destroy y comprobar registry/recursos remanentes. Mantener flag registry true para futuras operaciones mientras exista.
+
+Grupo 3 tiene implementación y evidencia real; entrega 03 **no está cerrada ni totalmente aprobada**. Revisión humana pendiente para INT-04 parcial/fallo de recuperación, limitaciones de calidad y limpieza final. No se ampliaron criterios ni se cambió serving para convertir fallos en PASS.
+
+## Aceptación y cierre de fase 03
+
+El propietario declaró: «Acepto la limitación y cierro la fase 03 con el fallo documentado en validation.md. Procede con el commit de cierre de la fase 03 y ejecuta la destrucción limpia de la infraestructura para no acumular costos.»
+
+La entrega queda cerrada con INT-04 PARCIAL y el fallo de recuperación del serving aceptados; se conservan FAIL, trazas, códigos de salida y limitaciones de calidad originales. La aceptación no convierte la recuperación en PASS ni corrige su causa. Se autorizó explícitamente el commit y el cierre de la sesión: eliminar cargas/PVC antes de Terraform, destruir repositorio e infraestructura del laboratorio y comprobar recursos externos al estado. Evidencia de limpieza se añade al terminar, sin anticipar resultados.

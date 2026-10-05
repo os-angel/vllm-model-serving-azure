@@ -20,7 +20,7 @@ Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requi
 
 ## 3. Integración
 
-**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Estado:** FastAPI y HTML/JavaScript implementados, presupuesto aproximado de caracteres aprobado, Grupos 1 y 2 validados localmente. Imagen amd64 y manifiestos CPU preparados. **Pendiente:** revisar plan/costo de registry/publicación/despliegue y ejecutar Grupo 3 contra GKE; no se acredita integración real por las pruebas simuladas.
+**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Estado:** Grupos 1–3 ejecutados; plan/costo y despliegue aprobados, imagen publicada por digest y chat Ready en CPU. SDK y conversación real de dos turnos observados. **Pendiente:** revisión humana del resultado con limitación de serving: dos reinicios automáticos por fallo de caché Mamba e inferencia no completada tras interrupción/reintento. No se ajustó vLLM en esta entrega. Limpieza final pendiente en la sesión continua.
 
 ## 4. Evaluación y cierre
 

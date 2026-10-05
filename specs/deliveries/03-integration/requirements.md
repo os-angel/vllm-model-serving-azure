@@ -1,6 +1,6 @@
 # 03 — Integración: requisitos
 
-**Estado:** PLAN APROBADO por el propietario. Grupos 1 y 2 autorizados; despliegue pendiente de revisión concreta de recursos y costo.
+**Estado:** CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Grupos 1–3 ejecutados; fallo de recuperación del serving conservado en validación. Commit y limpieza final autorizados.
 
 ## Contexto y decisiones
 

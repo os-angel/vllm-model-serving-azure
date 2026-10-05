@@ -1,6 +1,6 @@
 # 03 — Integración: plan
 
-**Estado:** APROBADO por el propietario; Grupos 1 y 2 implementados y validados localmente. Grupo 3 pendiente de revisión de publicación/despliegue. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
+**Estado:** CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Grupos 1–3 ejecutados; fallo del serving tras interrupción/reintento conservado. Commit y limpieza final autorizados; resultados del cierre en validation.md. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
 
 ## Grupo 0 — Revisar diseño
 
@@ -38,3 +38,5 @@ Salida: diff y artefactos revisables. Antes de despliegue facturable, presentar 
 - 3.4 Registrar matriz por requisito, limitaciones y revisión humana. Preparar limpieza de aplicación; cierre de sesión incluye cargas/PVC, Terraform e inventario de remanentes. INT-11.
 
 Salida: comportamiento observado y evidencia por ID. Los fallos de calidad heredados se conservan; fase 03 no acredita capacidad, rendimiento ni calidad del modelo.
+
+**Resultado:** plan real de tres recursos revisado y aprobado, apply/publicación/despliegue ejecutados. Chat Ready en CPU; SDK chat/stream, navegador de dos turnos, parámetros, truncación, cancelación, indisponibilidad y timeout controlados comprobados. Frontera y recorte estimados observados en backend desplegado. Auditoría de 28 entradas de logs del chat sin marcadores de solicitudes/respuestas. Fallo real: vLLM registró `IndexError: pop from empty list` en caché Mamba, dos reinicios automáticos; reintento tras interrupción inesperada no consiguió completar inferencia. Chat mantuvo Ready y mostró error sin duplicación. No se cambió serving; no se atribuye PASS a esa recuperación. Detalles, fixtures fallidos/corregidos y límites en `validation.md` y [group-3.md](group-3.md). Infraestructura permanece en la sesión continua autorizada; limpieza final todavía no ejecutada.
