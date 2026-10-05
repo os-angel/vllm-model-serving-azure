@@ -1,6 +1,6 @@
 # 01 — Infraestructura base: validación
 
-**Estado general:** APROBADA OPERATIVAMENTE para avanzar a la entrega 02 por decisión expresa del propietario (2026-10-04). INF-01–INF-06, INF-08 e INF-09 tienen evidencia PASS. INF-07 queda pendiente y transferido a la comprobación de descarga/caché del modelo en serving; INF-10 queda pendiente para el cierre final del laboratorio. La infraestructura permanece desplegada por instrucción expresa durante la sesión continua. INF-02 también tiene evidencia PASS posterior al despliegue.
+**Estado general:** APROBADA OPERATIVAMENTE por decisión expresa del propietario (2026-10-04). INF-01–INF-06, INF-08 e INF-09 tienen evidencia PASS. INF-07 transferido a la comprobación de descarga/caché en serving. INF-10 PASS al cierre final autorizado: cargas/PVC/disco retirados antes de diez recursos Terraform, estado vacío e inventario sin recursos del laboratorio. Evidencia de limpieza en validación 03. La infraestructura ya no permanece desplegada. INF-02 también tiene evidencia PASS posterior al despliegue.
 
 ## Registro de evidencia por requisito
 
@@ -15,7 +15,7 @@
 | INF-07 | Revisar tipo y tamaño de discos, uso y caché prevista. | 2026-10-04: ambos pools reportan boot disk `pd-balanced` de 50 GB. Compute confirmó que el disco GPU es `pd-balanced` de 50 GB; dentro del pod GPU, `df -h /` mostró overlay de 46G, 21G usados y 25G disponibles (46%). La ruta y el uso de caché tras descargar el modelo siguen pendientes. | PENDIENTE |
 | INF-08 | Probar acceso administrativo e inventariar Services. | 2026-10-04: `kubectl` devolvió nodos y Services; ninguno es `LoadBalancer` (hay un NodePort `default-http-backend` de `kube-system`). El propietario confirmó que `masterAuthorizedNetworksConfig` contiene únicamente su CIDR vigente `/32`, con `gcpPublicCidrsAccessEnabled: false`; el valor concreto se omite. | PASS |
 | INF-09 | Revisar plan y costo antes de aplicar. | Plan `7 to add` y estimación bruta USD 0.964554116/h; 30 min USD 0.482277058, más consumo variable y posible pool transitorio. El propietario indicó el 2026-10-03: «Plan y estimación de costos revisados y aprobados». [Grupo 2](group-2.md). Reconfirmar entradas dinámicas antes de aplicar. | PASS |
-| INF-10 | Inspeccionar cierre Kubernetes, destrucción e inventario final. | Salida resumida del plan de destrucción, estado final e inventario de clúster, pools, discos, IP, redes y remanentes. | PENDIENTE |
+| INF-10 | Inspeccionar cierre Kubernetes, destrucción e inventario final. | Cierre autorizado: cargas/PVC/PV/disco retirados antes de Terraform; plan 10 a destruir aplicado, estado vacío e inventario final sin recursos del laboratorio. Evidencia en validación 03. | PASS |
 
 ## Formato para cada ejecución
 

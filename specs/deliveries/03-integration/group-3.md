@@ -1,6 +1,6 @@
 # Grupo 3 — Plan real para revisión de despliegue
 
-**Estado:** cerrada por el propietario con fallo de recuperación del serving aceptado y conservado. Commit y destrucción limpia autorizados; evidencia final en validation.md. Inicio 2026-10-04, hora local America/Guatemala.
+**Estado:** cerrada por el propietario con fallo de recuperación del serving aceptado y conservado. Commit `f93bf8c`; limpieza Kubernetes/PVC/disco y diez recursos Terraform completada, estado vacío e inventario sin recursos del laboratorio. Evidencia final en validation.md. Inicio 2026-10-04, hora local America/Guatemala.
 
 El propietario respondió «si, demosle» a la revisión del plan de tres recursos, publicación y despliegue. Preferencia de ejecución: usar siempre `uv` para Python y dependencias. Apply observado: 3 added, 0 changed, 0 destroyed. Esta aprobación cubre el despliegue y sus pruebas, no acredita sus resultados.
 

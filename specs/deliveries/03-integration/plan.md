@@ -1,6 +1,6 @@
 # 03 — Integración: plan
 
-**Estado:** CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Grupos 1–3 ejecutados; fallo del serving tras interrupción/reintento conservado. Commit y limpieza final autorizados; resultados del cierre en validation.md. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
+**Estado:** CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Grupos 1–3 ejecutados; fallo del serving tras interrupción/reintento conservado. Commit y limpieza final completados; resultados del cierre e inventario en validation.md. Releer requisitos al iniciar cada grupo. El README exige revisión humana y commit de especificaciones revisadas antes del código.
 
 ## Grupo 0 — Revisar diseño
 

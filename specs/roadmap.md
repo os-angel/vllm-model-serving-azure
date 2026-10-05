@@ -1,10 +1,10 @@
 # Hoja de ruta del laboratorio
 
-Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requirements.md`, `plan.md` y `validation.md` en `specs/deliveries/<entrega>/`. La entrega 01 fue aprobada operativamente el 2026-10-04; INF-10 se difiere al cierre final por decisión del propietario. Serving y PVC están desplegados con autorización; recuperación y respuesta fueron observadas. La validación automatizada 02 ya se ejecutó con recuperación y una comparación de razonamiento: contrato técnico exitoso con presupuesto mayor, calidad FP8/aritmética fallida. Entrega 02 cerrada por el propietario el 2026-10-04 con calidad fallida y SRV-05/SRV-10/SRV-11 parciales aceptados; ver matriz y aceptación en validación 02. La siguiente entrega es 03-integración.
+Las entregas siguen el orden del [README](../README.md). Las fases 01–03 fueron ejecutadas; fases 02 y 03 cerradas por el propietario con limitaciones aceptadas y fallos conservados. Sesión cloud finalizada: cargas/PVC/disco retirados antes de destruir diez recursos Terraform; estado vacío e inventario final sin recursos del laboratorio. INF-10 completado. La evaluación sostenida de fase 04 no se ejecutó; una nueva sesión requiere revisar despliegue/costo otra vez. Evidencia en las validaciones 01–03 y retrospectiva en [Aprendizaje.md](../Aprendizaje.md).
 
 ## Hechos, decisiones y supuestos de planificación
 
-- **Hecho:** el clúster GKE, sus pools y serving están desplegados; evidencia en validación 01/02. Boot disk GPU ampliado directamente a 100 GB; plantilla actual del pool en 50 GB, excepción Terraform documentada en `tech.md`.
+- **Hecho histórico:** GKE, pools, serving y chat fueron desplegados y comprobados, después eliminados al cierre autorizado. Boot disk GPU ampliado directamente a 100 GB; plantilla del pool en 50 GB durante aquella sesión, excepción documentada en `tech.md`.
 - **Decisión:** trabajar por entregas verificables, registrar resultados por requisito y destruir los recursos al final de cada sesión del laboratorio.
 - **Dato informado por el propietario:** `gcloud` mostró cuota regional activa de una L4 y oferta del acelerador en `us-central1-a/b/c`. Se utilizará `us-central1-a`; capacidad efectiva y versiones disponibles se comprobarán antes de la implementación facturable.
 
@@ -16,13 +16,15 @@ Las entregas siguen el orden del [README](../README.md). Cada una tendrá `requi
 
 **Estado:** cerrada con limitaciones aceptadas el 2026-10-04; se conservan resultados FAIL/PARCIAL observados.
 
-**Objetivo:** desplegar vLLM con el checkpoint FP8 en la L4 y exponerlo por Service interno. **Salida verificable:** modelo cargado, pod ubicado en GPU, respuesta y streaming desde un cliente compatible con OpenAI; tiempo de recuperación tras reinicio documentado. **Dependencias:** revisión de las especificaciones 02, fijar digest de imagen y revisión del modelo, autorización/licencia de pesos y confirmar espacio de caché durante descarga. Una sola GPU implica interrupción durante reinicios. La infraestructura continúa encendida por decisión del propietario durante la sesión actual; INF-10 se ejecuta al cierre final.
+**Objetivo:** desplegar vLLM con el checkpoint FP8 en la L4 y exponerlo por Service interno. **Salida verificable:** modelo cargado, pod ubicado en GPU, respuesta y streaming desde un cliente compatible con OpenAI; tiempo de recuperación tras reinicio documentado. **Dependencias:** revisión de las especificaciones 02, fijar digest de imagen y revisión del modelo, autorización/licencia de pesos y confirmar espacio de caché durante descarga. Una sola GPU implica interrupción durante reinicios. Serving e infraestructura fueron eliminados en el cierre final; INF-10 verificado.
 
 ## 3. Integración
 
-**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Estado:** Grupos 1–3 ejecutados; plan/costo y despliegue aprobados, imagen publicada por digest y chat Ready en CPU. SDK y conversación real de dos turnos observados. **Pendiente:** revisión humana del resultado con limitación de serving: dos reinicios automáticos por fallo de caché Mamba e inferencia no completada tras interrupción/reintento. No se ajustó vLLM en esta entrega. Limpieza final pendiente en la sesión continua.
+**Objetivo:** backend e interfaz de chat en CPU, con historial, respuesta progresiva, estado, errores y parámetros por petición `temperature` y `max_tokens`. **Salida verificable:** conversación de varios turnos desde la interfaz y llamada independiente por SDK. **Estado:** cerrada por el propietario; SDK y conversación real de dos turnos observados. Fallo de recuperación de serving aceptado: dos reinicios automáticos por caché Mamba e inferencia no completada tras interrupción/reintento. No se ajustó vLLM. Limpieza de aplicación, serving/PVC, infraestructura y registry completada.
 
 ## 4. Evaluación y cierre
+
+**Estado:** limpieza final ejecutada y verificada al cerrar fase 03. Evaluación sostenida de capacidad/rendimiento y factura real pendientes; no se declara completada esta entrega.
 
 **Objetivo:** medir memoria, latencia, throughput, concurrencia y costo; después eliminar cargas Kubernetes y destruir infraestructura. **Salida verificable:** tabla de resultados con condiciones de prueba y umbrales, costo bruto y créditos separados, evidencia de recursos eliminados. **Dependencia:** acordar umbrales de latencia y errores antes de medir. Las cotas aritméticas del README no cuentan como capacidad publicada.
 

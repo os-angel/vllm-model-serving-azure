@@ -4,6 +4,8 @@
 
 **Estado: CERRADA CON LIMITACIONES ACEPTADAS.** El propietario aprobó la revisión y dio por cerrada la entrega 02 el 2026-10-04. Aceptó expresamente SRV-05, SRV-10 y SRV-11 PARCIAL y los fallos de calidad FP8/aritmética como limitaciones documentadas de esta fase. Se conservan estados, respuestas, códigos de salida y límites originales; la aceptación no convierte FAIL/PARCIAL en PASS ni determina la causa de la mala inferencia.
 
+**Cierre cloud posterior:** al cerrar fase 03, el propietario autorizó finalizar la sesión. Deployment/Service vLLM y PVC/PV/disco eliminados antes de Terraform; infraestructura y registry destruidos, estado vacío e inventario final sin recursos del laboratorio. Evidencia en [validación 03](../03-integration/validation.md). En integración se observaron dos reinicios automáticos por `IndexError: pop from empty list` en caché Mamba; limitación aceptada sin alterar los resultados históricos de esta entrega.
+
 ## Ejecuciones
 
 - Base: `20261004-210214`, `/no_think`, temperatura 0, 128 tokens, recuperación incluida; exit 1.

@@ -1,6 +1,6 @@
 # 03 — Integración: validación
 
-**Estado:** ENTREGA 03 CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Recuperación del serving tras interrupción/reintento fallida; resultado original conservado. Limpieza final autorizada y en ejecución.
+**Estado:** ENTREGA 03 CERRADA POR EL PROPIETARIO CON LIMITACIÓN ACEPTADA. Recuperación del serving tras interrupción/reintento fallida; resultado original conservado. Sesión finalizada con limpieza Kubernetes/PVC/Terraform e inventario verificados.
 
 ## Inicio del Grupo 3 — preflight y revisión pendiente
 
@@ -34,7 +34,7 @@ Decisión recibida del propietario: backend FastAPI, priorizando facilidad de pr
 | INT-08 | Cliente SDK independiente: chat y streaming. | PASS REAL: chat no vacío/modelo correcto/stop y streaming de 183 chunks/stop; `/think`, temperature=0, max_tokens=2048. No atribuye calidad general. |
 | INT-09 | Logs sin contenido, texto seguro e historial efímero. | PASS EN MUESTRA: 28 entradas cloud de todos los pods del chat, sin marcadores de prompts/respuesta ni access logs; código sin contenido/Secret/token Kubernetes. JS desplegado idéntico al validado localmente con HTML inerte; recarga sin historial/storage. No es auditoría exhaustiva de seguridad ni de logs de vLLM. |
 | INT-10 | Build reproducible, versiones/digest e instrucciones. | PASS REAL: reconstrucción amd64/smoke, push y digest remoto confirmado, Deployment por digest; lock/bases fijados e instrucciones reproducibles. |
-| INT-11 | Revisión de recursos/costo y evidencia de limpieza. | PARCIAL: aprobación explícita antes de apply, tres recursos creados sin modificar infraestructura heredada; limpieza documentada y manifiesto restaurado. Cierre cloud/registry/PVC/Terraform no ejecutado aún en sesión continua. |
+| INT-11 | Revisión de recursos/costo y evidencia de limpieza. | PASS: aprobación explícita antes de apply; limpieza Kubernetes/PVC/disco antes de Terraform, diez recursos destruidos y estado vacío; inventario final sin recursos del laboratorio. Detalles y límites al final. |
 
 Para cada ejecución registrar fecha/hora, tarea, comando o procedimiento, resultado observado, ubicación de evidencia y límites. Pruebas simuladas no acreditan integración real. Crear estos documentos no acredita ningún requisito funcional.
 
@@ -102,3 +102,24 @@ Grupo 3 tiene implementación y evidencia real; entrega 03 **no está cerrada ni
 El propietario declaró: «Acepto la limitación y cierro la fase 03 con el fallo documentado en validation.md. Procede con el commit de cierre de la fase 03 y ejecuta la destrucción limpia de la infraestructura para no acumular costos.»
 
 La entrega queda cerrada con INT-04 PARCIAL y el fallo de recuperación del serving aceptados; se conservan FAIL, trazas, códigos de salida y limitaciones de calidad originales. La aceptación no convierte la recuperación en PASS ni corrige su causa. Se autorizó explícitamente el commit y el cierre de la sesión: eliminar cargas/PVC antes de Terraform, destruir repositorio e infraestructura del laboratorio y comprobar recursos externos al estado. Evidencia de limpieza se añade al terminar, sin anticipar resultados.
+
+## Limpieza final verificada — 2026-10-04, America/Guatemala
+
+Commit de cierre de fase 03: `f93bf8c` (`feat(integration): close phase 03 with accepted serving limitation`). Los archivos ajenos `AGENTS.md`, `Aprendizajes.md` y `Diagrama.md` se conservaron sin seguimiento. La destrucción fue autorizada explícitamente por el propietario; no se requirió una nueva aprobación del mismo cierre.
+
+| Paso | Resultado observado / evidencia privada en `.local/cleanup-validation/` |
+|---|---|
+| Inventario inicial | Contexto `gke_llmresearch-510422_us-central1-a_nemotron-lab`; recursos Kubernetes, PV, instancias y discos capturados antes de eliminar. |
+| Cargas | Eliminados Deployment/Service de chat y vLLM mientras GKE seguía accesible; consulta posterior sin pods en `inference`. |
+| Caché | PVC `vllm-cache` eliminado; PV `pvc-113f3d35-4926-4a24-b84b-a177ffd6e640` con reclaim policy Delete eliminado; consulta cloud del disco del mismo nombre → `[]`. Eliminación completada antes de aplicar destrucción. |
+| Controladores | Namespace sin Deployment/Service/pod/PVC/Ingress; ningún PV restante. Inventario del clúster sin Service LoadBalancer/Ingress; inventarios cloud sin forwarding rules ni NEG antes de destruir GKE. |
+| Plan revisado | `terraform plan -destroy`, flag registry true: **0 to add, 0 to change, 10 to destroy**. Solo recursos administrados del laboratorio; plan/log privados y excluidos de Git. |
+| Destrucción | `terraform apply` del plan de destrucción → exit 0, **0 added, 0 changed, 10 destroyed**. Registry y Reader, pools, clúster, cuenta/rol de nodos, subred y VPC eliminados. API Artifact Registry retirada del estado sin deshabilitar API compartida (`disable_on_destroy=false`). Log `terraform-destroy.log`. |
+| Estado final | `terraform state list` → exit 0, salida vacía (`terraform-final-state-list.txt`, 0 bytes). Estado local conservado para trazabilidad, fuera de Git. |
+| Inventario final | 21 consultas cloud ejecutadas con exit 0; `final-audit-summary.json` sin coincidencias del laboratorio en ninguna categoría. Ver alcance abajo. |
+
+Inventario final posterior a destrucción: cero clústeres, instancias, discos, direcciones reservadas, forwarding rules, NEG, target pools, backend services, health checks, routers, snapshots, resource policies, plantillas, grupos de instancias/MIG y repositorios Artifact Registry en el proyecto. Sin VPC/subred/rutas/firewalls/cuenta de servicio del laboratorio. Se conservaron recursos previos ajenos: una red, 42 subredes, cuatro firewalls, 43 rutas y una cuenta de servicio. Las IP efímeras de nodos se liberan con sus instancias, cuya ausencia se verificó; no se confunden con el inventario de IP reservadas.
+
+Remanentes intencionales: APIs Compute/GKE/Artifact Registry habilitadas, archivos de evidencia/estado e imagen Docker local, y logs históricos. No se borraron recursos ajenos ni logs de evidencia. No se observaron recursos facturables del laboratorio en el inventario consultado. Esto no mide la factura acumulada ni certifica recursos de otros proyectos/cuentas; los cargos anteriores pueden aparecer después en facturación. Mediciones sostenidas de fase 04 no se ejecutaron ni se atribuyen a esta limpieza.
+
+Comprobación final iniciada a `2026-10-05 05:35:52 UTC` (2026-10-04 23:35:52 local). Los port-forwards propios ya estaban cerrados. Sesión cloud finalizada; cualquier nuevo despliegue requiere revisar nuevamente recursos y costo.
