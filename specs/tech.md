@@ -83,3 +83,7 @@ La configuración del Grupo 1 fija `hashicorp/google` `7.46.1` y produjo un plan
 ## Criterios técnicos de validación
 
 Comprobar nodos Ready, `nvidia.com/gpu: 1`, colocación de pods, carga del modelo, respuesta mediante SDK y chat, streaming, historial y errores. Registrar VRAM en reposo y durante prefill/generación, primer token, p50/p95, tokens/s, cola y concurrencia sostenida. Verificar después la eliminación de cargas y recursos facturables. Los resultados reales irán en `specs/deliveries/<entrega>/validation.md`.
+
+## Diseño aprobado de integración 03
+
+FastAPI en pool CPU y chat HTML/JavaScript sencillo. Historial efímero en navegador. Por decisión del propietario, presupuesto aproximado ceil(caracteres/4) más 8 tokens estimados por mensaje, con reserva de salida y límite 4096; retirar pares completos antiguos y mostrar errores de contexto de vLLM. No equivale a conteo exacto ni garantía de encaje. Grupo 1 autorizado; imagen/registry, manifiestos CPU y revisión de costo corresponden al Grupo 2.
