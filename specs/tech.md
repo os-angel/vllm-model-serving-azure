@@ -1,6 +1,6 @@
 # Diseño técnico
 
-Este archivo cumple la función de `techstack.md`. Distingue documentación comprobada, decisiones del laboratorio y puntos que aún requieren validación. No representa infraestructura ya desplegada.
+Este archivo cumple la función de `techstack.md`. Distingue documentación comprobada, decisiones del laboratorio y puntos que aún requieren validación. La infraestructura y el serving están desplegados; la evidencia observada se registra en las validaciones 01 y 02.
 
 ## Hechos verificados en documentación
 
@@ -17,7 +17,7 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 | Proyecto | `llmresearch-510422`, informado por el propietario |
 | Clúster | GKE Standard en `us-central1-a`; `us-central1-b` o `us-central1-c` son alternativas solo tras revisar un plan nuevo |
 | Nodos | Un pool CPU `e2-standard-4` y uno GPU `g2-standard-4` con una L4, según el README |
-| Discos de arranque | `pd-balanced` de 50 GB para cada nodo; evaluar 80–100 GB en GPU si las pruebas muestran falta de espacio |
+| Discos de arranque y caché | CPU `pd-balanced` 50 GB; GPU real `pd-balanced` 100 GB; PVC de modelo `pd-balanced` 50 GiB montado en `/root/.cache/huggingface` |
 | Orquestación | Manifiestos Kubernetes versionados; vLLM en GPU y backend/interfaz en CPU |
 | Acceso de administración | Endpoint público de control GKE con Master Authorized Networks restringido a la IP dinámica del operador; proporcionar el CIDR `/32` al preparar cada plan, sin guardarlo en archivos versionables; `kubectl` directo, sin VPN ni bastion |
 | Acceso de cargas | Service `ClusterIP` interno y `kubectl port-forward`; sin LoadBalancer público, alta disponibilidad ni escalado automático inicial |
@@ -31,9 +31,13 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 - **GKE:** canal Stable, parche candidato `1.35.6-gke.1250000` disponible en `us-central1-a` al consultar el proyecto el 2026-10-03. La [tabla pública de GKE](https://docs.cloud.google.com/kubernetes-engine/docs/release-notes) asocia ese parche predeterminado a `cos-125-19216-395-109`; la [lista de drivers de esa imagen COS para L4](https://storage.googleapis.com/cos-tools/19216.395.109/lakitu/gpu_driver_versions.textproto) etiqueta `580.159.04` como `DEFAULT`. Elegir instalación administrada `DEFAULT`; comprobar imagen y driver reales en el nodo antes de considerarlos validados. No instalar en paralelo drivers manuales y administrados.
 - **vLLM:** usar `v0.10.1` como primer candidato porque NVIDIA lo documenta para este checkpoint. Hay versiones posteriores; cambiar de versión exige repetir la prueba de carga del modelo y API. Fijar imagen por digest y revisión del modelo después de validarlas.
 - **Serving inicial:** una GPU, `--mamba_ssm_cache_dtype float32`, `--max-model-len 4096`, `--max-num-seqs 1` y `--gpu-memory-utilization 0.90`, según el README. Los parámetros son un punto de partida, no una capacidad garantizada. Validar la sintaxis con la imagen elegida.
-- **Almacenamiento:** discos de arranque `pd-balanced` de 50 GB en ambos pools. Si la imagen de vLLM y los pesos saturan el nodo GPU, evaluar 80–100 GB `pd-balanced` mediante cambio revisado; no se aumenta preventivamente.
+- **Almacenamiento efectivo:** CPU 50 GB y GPU 100 GB `pd-balanced`; el propietario amplió directamente el boot disk GPU y la evidencia confirma 100 GB. PVC `standard-rwo` de 50 GiB montado en `/root/.cache/huggingface` para pesos/cache; la imagen OCI usa el boot disk. La plantilla del pool GKE existente sigue en 50 GB. Terraform declara 100 GB para futuras creaciones y `ignore_changes = [node_config[0].disk_size_gb]` impide que esta diferencia provoque un surge del pool de una L4. Es una excepción explícita al control del tamaño por Terraform mientras exista este pool; no implica que la plantilla actual se haya actualizado. Al recrear el laboratorio desde cero con Terraform, el pool GPU tendrá 100 GB. Una reparación/recreación automática de nodos del pool existente usa su plantilla de 50 GB; esta excepción no actualiza esa plantilla.
 
 ## Hipótesis por validar
+
+### Corrección de descubrimiento CUDA en GKE (2026-10-04)
+
+El contenedor vLLM requiere `LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64`. La inspección observó el driver NVML montado en la primera ruta, pero el entorno original solo incluía la segunda. Tras aplicar la corrección, la carga de `libnvidia-ml.so.1` por nombre funciona, PyTorch reporta CUDA disponible y NVIDIA L4, y vLLM 0.10.1 registra detección automática de CUDA. Esto valida el descubrimiento del dispositivo; la carga del checkpoint y la API se registran por separado en validación 02.
 
 - El checkpoint FP8 carga y responde correctamente en una L4 con la combinación de imagen, CUDA y driver seleccionada.
 - El espacio del nodo y la ruta de descarga/caché permiten recrear el modelo sin conservar volúmenes facturables.
@@ -52,7 +56,7 @@ Este archivo cumple la función de `techstack.md`. Distingue documentación comp
 - Las consultas de solo lectura confirmaron facturación habilitada, cuota regional `NVIDIA_L4_GPUS` 1/0 usada, `E2_CPUS` 24/0, `CPUS` 200/0 e `IN_USE_ADDRESSES` 8/0 en `us-central1`. `gcloud compute accelerator-types list` devolvió `nvidia-l4` para `us-central1-a`. La oferta y la cuota no prueban capacidad física disponible al crear el nodo.
 - `compute.googleapis.com` estaba habilitada. `container.googleapis.com` estaba deshabilitada el 2026-10-02 y se habilitó el 2026-10-03 con autorización del propietario, sin crear clústeres. La consulta zonal posterior confirmó el parche Stable `1.35.6-gke.1250000`.
 - GKE publica `cos-125-19216-395-109` para ese parche y COS lista `580.159.04` como driver `DEFAULT` para L4. Es una correspondencia documental, no una versión observada en un nodo. Supera la referencia conservadora R570 para CUDA 12.8; la compatibilidad con vLLM continúa como hipótesis hasta la prueba real.
-- El repositorio del modelo muestra aproximadamente 10.3 GB de archivos. Los 50 GB del disco GPU son una hipótesis inicial: faltan tamaño descomprimido de la imagen OCI, caché de descarga, espacio del sistema y medición en el nodo. No se aumenta el disco sin evidencia ni plan revisado.
+- El repositorio del modelo muestra aproximadamente 10.3 GB de archivos. El propietario eligió un PVC de 50 GiB para los pesos y la caché; se validará que el uso efectivo de la caché quepa. Los 25 GB libres del boot disk GPU quedan para imagen/uso efímero; la expansión real de la imagen OCI aún se debe medir.
 
 Las fuentes, comandos y estimación de costo del Grupo 0 están en [su evaluación](deliveries/01-infra-base/group-0.md). La salida y el estado se decidieron el 2026-10-03; el CIDR dinámico se pasará como entrada no versionada antes de cada plan.
 

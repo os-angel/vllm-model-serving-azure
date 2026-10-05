@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-cache
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/component: model-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard-rwo
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 50Gi

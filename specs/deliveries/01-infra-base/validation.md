@@ -86,6 +86,10 @@ El primer intento del plan falló por ruta de `gcloud` ausente en el `PATH` del 
 
 ## Comprobaciones del Grupo 3 — 2026-10-04
 
+### Decisión de almacenamiento para la Entrega 02 (histórico)
+
+Tras considerar inicialmente aumentar el boot disk GPU, el propietario decidió conservar el disco actual `pd-balanced` de 50 GB y usar un PVC independiente `pd-balanced` de 50 GiB para pesos/cache. La decisión evita modificar el node pool con `SURGE maxSurge=1` ante cuota de una L4. En esa decisión inicial el PVC aún no estaba creado. Posteriormente se autorizó y desplegó el PVC de 50 GiB y el propietario amplió directamente el boot disk GPU a 100 GB. La plantilla del pool conserva 50 GB; Terraform declara 100 GB para nuevos pools e ignora cambios de ese campo en el pool existente para evitar surge. Evidencia y límites aceptados en la entrega 02, cerrada el 2026-10-04; INF-07 conserva la limitación de ocupación OCI/medición previa al pull (SRV-10 PARCIAL), no se atribuye un PASS nuevo.
+
 ### Despliegue y resultados operativos
 
 | ID | Fuente | Resultado observado | Estado | Limitación y siguiente acción |

@@ -6,8 +6,8 @@ Construir un laboratorio replicable en GCP que sirva `nvidia/NVIDIA-Nemotron-Nan
 
 ## Hechos verificados
 
-- El repositorio contiene documentación y un commit inicial de la constitución; aún no hay infraestructura, aplicación ni pruebas.
-- El [README](../README.md) declara que esta combinación todavía no se ha desplegado ni medido. Las cifras de capacidad son cálculos de planificación.
+- Infraestructura y serving están desplegados; las pruebas observadas constan en validación 01 y 02. Entrega 02 cerrada con limitaciones aceptadas por el propietario el 2026-10-04; la aplicación de fase 03 aún no está implementada.
+- El modelo responde por la API interna y externa mediante port-forward. Las cifras de concurrencia del README siguen siendo cálculos de planificación, no capacidad validada.
 - La [ficha oficial del modelo](https://huggingface.co/nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8) documenta su uso con vLLM y el estado Mamba en FP32.
 
 ## Decisiones confirmadas
@@ -21,7 +21,7 @@ Construir un laboratorio replicable en GCP que sirva `nvidia/NVIDIA-Nemotron-Nan
 ## Supuestos y límites
 
 - El propietario informó una cuota activa de una L4 en `us-central1` y oferta del acelerador en `us-central1-a`, `us-central1-b` y `us-central1-c`, consultadas con `gcloud`. La capacidad física al crear el nodo no está reservada. La VRAM nominal es 24 GB; VRAM utilizable y capacidad de servicio se medirán en ejecución.
-- La línea base usa discos de arranque `pd-balanced` de 50 GB en ambos nodos. La suficiencia para la imagen y la caché del modelo sigue por comprobar.
+- Boot disks `pd-balanced`: CPU 50 GB y GPU 100 GB, este último ampliado directamente por el propietario y confirmado por la evidencia del 2026-10-04. Los pesos del modelo se almacenan en un PVC dedicado `pd-balanced` de 50 GiB. La plantilla del pool existente conserva 50 GB; reconciliación controlada en `tech.md`.
 - Este laboratorio no acredita por sí solo privacidad empresarial, autenticación de producción ni una capacidad determinada de usuarios.
 
 ## Resultado aceptable

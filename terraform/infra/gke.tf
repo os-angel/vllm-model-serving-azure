@@ -74,7 +74,7 @@ resource "google_container_node_pool" "gpu" {
     machine_type    = "g2-standard-4"
     image_type      = "COS_CONTAINERD"
     disk_type       = "pd-balanced"
-    disk_size_gb    = 50
+    disk_size_gb    = 100
     service_account = google_service_account.gke_nodes.email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
 
@@ -96,6 +96,13 @@ resource "google_container_node_pool" "gpu" {
         gpu_driver_version = "DEFAULT"
       }
     }
+  }
+
+  # El disco del nodo existente se amplió directamente a 100 GB.
+  # La plantilla GKE sigue en 50 GB: cambiarla causaría surge con cuota de una L4.
+  # Nuevas creaciones usarán 100 GB; el tamaño del pool existente no se actualiza.
+  lifecycle {
+    ignore_changes = [node_config[0].disk_size_gb]
   }
 
   depends_on = [google_project_iam_member.gke_node_role]

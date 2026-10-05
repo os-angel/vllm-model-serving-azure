@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/part-of: nemotron-lab
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vllm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vllm
+        app.kubernetes.io/part-of: nemotron-lab
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 120
+      nodeSelector:
+        workload: gpu
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: gpu
+          effect: NoSchedule
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai@sha256:c62343ee72f094ef574ab3af2717d0c60fec5e0808b238f19ac4c0d22fd152f7
+          imagePullPolicy: IfNotPresent
+          args:
+            - --model
+            - nvidia/NVIDIA-Nemotron-Nano-9B-v2-FP8
+            - --revision
+            - 8bc5eece2eb5514c4bca7f2ec655b91eb554f4c0
+            - --tokenizer-revision
+            - 8bc5eece2eb5514c4bca7f2ec655b91eb554f4c0
+            - --code-revision
+            - 6533e8de2c68e4536bf7c411d7a3ce5734111476
+            - --trust-remote-code
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+            - --tensor-parallel-size
+            - "1"
+            - --gpu-memory-utilization
+            - "0.90"
+            - --mamba_ssm_cache_dtype
+            - float32
+            - --max-model-len
+            - "4096"
+            - --max-num-seqs
+            - "1"
+            - --no-enable-log-requests
+            - --disable-uvicorn-access-log
+          env:
+            - name: HF_HOME
+              value: /root/.cache/huggingface
+            - name: LD_LIBRARY_PATH
+              value: /usr/local/nvidia/lib64:/usr/local/cuda/lib64
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "3"
+              memory: 8Gi
+              ephemeral-storage: 5Gi
+            limits:
+              cpu: 3800m
+              memory: 12Gi
+              ephemeral-storage: 10Gi
+              nvidia.com/gpu: "1"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 180
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: hf-cache
+              mountPath: /root/.cache/huggingface
+      volumes:
+        - name: hf-cache
+          persistentVolumeClaim:
+            claimName: vllm-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/part-of: nemotron-lab
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: vllm
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
